@@ -1,0 +1,182 @@
+'use client';
+
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { Condition } from '@/lib/supabase';
+
+interface DiagnosisAutocompleteProps {
+  conditions: Condition[];
+  onSubmit: (diagnosis: string) => void;
+  onDropdownStateChange: (isOpen: boolean) => void;
+}
+
+export default function DiagnosisAutocomplete({ conditions, onSubmit, onDropdownStateChange }: DiagnosisAutocompleteProps) {
+  const [inputValue, setInputValue] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Efficient search with memoization
+  const filteredConditions = useMemo(() => {
+    if (!inputValue.trim()) {
+      return [];
+    }
+
+    const searchTerm = inputValue.toLowerCase().trim();
+
+    // Filter conditions that match name only
+    const matches = conditions.filter((condition) => {
+      return condition.name.toLowerCase().includes(searchTerm);
+    });
+
+    // Limit to 40 results for performance
+    return matches.slice(0, 40);
+  }, [inputValue, conditions]);
+
+  // Handle input change
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputValue(value);
+    setIsOpen(value.trim().length > 0);
+    setSelectedIndex(-1);
+  };
+
+  // Handle option selection
+  const handleSelectOption = (conditionName: string) => {
+    setInputValue(conditionName);
+    setIsOpen(false);
+    setSelectedIndex(-1);
+    inputRef.current?.focus();
+  };
+
+  // Handle keyboard navigation
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!isOpen || filteredConditions.length === 0) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleSubmit();
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedIndex((prev) =>
+          prev < filteredConditions.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (selectedIndex >= 0 && selectedIndex < filteredConditions.length) {
+          handleSelectOption(filteredConditions[selectedIndex].name);
+        } else {
+          handleSubmit();
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setIsOpen(false);
+        setSelectedIndex(-1);
+        break;
+    }
+  };
+
+  // Scroll selected item into view
+  useEffect(() => {
+    if (selectedIndex >= 0 && dropdownRef.current) {
+      const selectedElement = dropdownRef.current.children[selectedIndex] as HTMLElement;
+      if (selectedElement) {
+        selectedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }, [selectedIndex]);
+
+  // Notify parent component when dropdown state changes
+  useEffect(() => {
+    onDropdownStateChange(isOpen && filteredConditions.length > 0);
+  }, [isOpen, filteredConditions.length, onDropdownStateChange]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+        setSelectedIndex(-1);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSubmit = () => {
+    if (inputValue.trim()) {
+      onSubmit(inputValue.trim());
+    }
+  };
+
+  return (
+    <div ref={containerRef} className="w-full max-w-2xl flex gap-3 relative">
+      <div className="flex-1 relative">
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          placeholder="Diagnosis..."
+          className="w-full px-6 py-4 rounded-lg text-lg bg-white bg-opacity-90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          autoComplete="off"
+        />
+
+        {/* Dropdown menu */}
+        {isOpen && filteredConditions.length > 0 && (
+          <div
+            className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 overflow-hidden"
+          >
+            <div
+              ref={dropdownRef}
+              className="overflow-y-auto"
+              style={{ maxHeight: '320px' }}
+            >
+              {filteredConditions.map((condition, index) => (
+                <button
+                  key={condition.id}
+                  onClick={() => handleSelectOption(condition.name)}
+                  className={`w-full text-left px-6 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+                    index === selectedIndex ? 'bg-blue-100' : ''
+                  }`}
+                >
+                  <div className="text-gray-800 font-medium">{condition.name}</div>
+                </button>
+              ))}
+            </div>
+
+            {/* Result count indicator */}
+            {filteredConditions.length === 40 && (
+              <div className="px-6 py-2 bg-gray-50 text-xs text-gray-500 text-center border-t border-gray-200">
+                Showing first 40 results. Type more to narrow down.
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <button
+        onClick={handleSubmit}
+        className="px-8 py-4 bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] hover:from-[#f59e0b] hover:to-[#f59e0b] text-black font-bold text-lg rounded-lg transition-all shadow-lg"
+      >
+        SUBMIT
+      </button>
+    </div>
+  );
+}

@@ -1,6 +1,7 @@
-import { getTotalPuzzleCount, getPuzzleByNumber, getHintsForPuzzle } from '@/lib/supabase';
+import { getTotalPuzzleCount, getPuzzleByNumber, getHintsForPuzzle, getAllConditions } from '@/lib/supabase';
 import { getTodaysPuzzleNumber } from '@/lib/gameLogic';
 import Image from 'next/image';
+import GameClient from '@/components/GameClient';
 
 export default async function Home() {
   try {
@@ -8,9 +9,10 @@ export default async function Home() {
     const todaysPuzzleNumber = getTodaysPuzzleNumber(totalPuzzles);
     const puzzle = await getPuzzleByNumber(todaysPuzzleNumber);
     const hints = await getHintsForPuzzle(puzzle.id);
+    const conditions = await getAllConditions();
 
     return (
-      <div className="min-h-screen relative overflow-hidden">
+      <div className="min-h-screen relative overflow-y-auto overflow-x-hidden">
         {/* Gradient Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#1a2744] via-[#2d3e5f] to-[#1a2744]">
           {/* Background decorative medical images */}
@@ -93,16 +95,7 @@ export default async function Home() {
             </div>
 
             {/* Input and Submit */}
-            <div className="w-full max-w-2xl flex gap-3">
-              <input
-                type="text"
-                placeholder="Diagnosis..."
-                className="flex-1 px-6 py-4 rounded-lg text-lg bg-white bg-opacity-90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-              <button className="px-8 py-4 bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] hover:from-[#f59e0b] hover:to-[#f59e0b] text-black font-bold text-lg rounded-lg transition-all shadow-lg">
-                SUBMIT
-              </button>
-            </div>
+            <GameClient conditions={conditions} />
           </div>
         </div>
       </div>

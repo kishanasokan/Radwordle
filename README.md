@@ -143,3 +143,7 @@ Contact the repository owner for contribution guidelines and access to environme
 ## License
 
 Private repository - All rights reserved.
+
+## Stuff to do 
+- Checkdown list should not allow prior guesses
+- Share button 
