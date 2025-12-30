@@ -95,6 +95,10 @@ puzzles
 ├── is_active (bool)
 ├── status (text) ← 'active' | 'retired' | 'draft'
 ├── last_shown_day (int4) ← -1 = never shown, otherwise day_number
+├── hint_1 (text, nullable) ← First hint revealed after wrong guess
+├── hint_2 (text, nullable) ← Second hint
+├── hint_3 (text, nullable) ← Third hint
+├── hint_4 (text, nullable) ← Fourth hint
 └── created_at (timestamptz)
 
 puzzle_schedule
@@ -102,16 +106,6 @@ puzzle_schedule
 ├── day_number (int4, unique) ← days since epoch (Dec 28, 2025)
 ├── puzzle_id (uuid, FK → puzzles.id, nullable)
 ├── is_manual (bool) ← true if manually scheduled via dashboard
-└── created_at (timestamptz)
-
-hints
-├── id (uuid, PK)
-├── puzzle_id (uuid, FK → puzzles.id)
-├── hint_order (int4)
-├── content_type (text)
-├── hint_text (text, nullable)
-├── image_url (text, nullable)
-├── image_caption (text, nullable)
 └── created_at (timestamptz)
 
 game_results
@@ -127,9 +121,10 @@ game_results
 ```
 
 **Relationships**:
-- `hints.puzzle_id` → `puzzles.id`
 - `puzzles.answer` → `conditions.name`
 - `puzzle_schedule.puzzle_id` → `puzzles.id`
+
+**Note**: Hints are stored directly on the puzzles table (hint_1 through hint_4) for easier data entry. The `getHintsFromPuzzle()` function in `lib/supabase.ts` converts these to the Hint[] format used by components.
 
 ## Dev Testing
 
