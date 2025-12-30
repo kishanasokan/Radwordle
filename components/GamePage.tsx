@@ -64,19 +64,19 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Header with Logo and Buttons */}
-        <div className="flex justify-between items-center p-6">
+        <div className="flex justify-between items-center p-3 sm:p-6">
           {/* Archives Button */}
           <Link
             href="/archive"
-            className="flex items-center gap-2 px-4 py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
+            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
           >
-            <span className="text-xl">📁</span>
-            <span className="font-bold font-baloo-2">Archives</span>
+            <span className="text-base sm:text-xl">📁</span>
+            <span className="font-bold font-baloo-2 text-xs sm:text-base">Archives</span>
           </Link>
 
           {/* Logo and Title - Centered */}
-          <div className="flex items-center gap-1">
-            <div className="relative w-16 h-16">
+          <div className="flex items-center gap-0.5 sm:gap-1">
+            <div className="relative w-8 h-8 sm:w-16 sm:h-16">
               <Image
                 src="/radle_icon.svg"
                 alt="Radiordle Icon"
@@ -85,7 +85,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
                 className="object-contain"
               />
             </div>
-            <h1 className="text-[3.375rem] text-white font-baloo-2 font-extrabold tracking-tight">
+            <h1 className="text-xl sm:text-3xl md:text-[3.375rem] text-white font-baloo-2 font-extrabold tracking-tight">
               Radiordle
             </h1>
           </div>
@@ -93,10 +93,10 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
           {/* Stats Button */}
           <button
             onClick={() => setShowStats(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
+            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
           >
-            <span className="text-xl">📊</span>
-            <span className="font-bold font-baloo-2">Stats</span>
+            <span className="text-base sm:text-xl">📊</span>
+            <span className="font-bold font-baloo-2 text-xs sm:text-base">Stats</span>
           </button>
         </div>
 
@@ -131,7 +131,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
           </div>
 
           {/* Question */}
-          <h2 className="text-[2.025rem] text-white font-bold font-baloo-2 mb-1">
+          <h2 className="text-xl sm:text-2xl md:text-[2.025rem] text-white font-bold font-baloo-2 mb-1">
             What&apos;s the Diagnosis?
           </h2>
 

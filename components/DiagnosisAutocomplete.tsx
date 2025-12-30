@@ -160,7 +160,7 @@ export default function DiagnosisAutocomplete({
   };
 
   return (
-    <div ref={containerRef} className="w-full max-w-2xl mx-auto flex gap-3">
+    <div ref={containerRef} className="w-full max-w-2xl mx-auto flex gap-2 sm:gap-3 px-2 sm:px-0">
       <div className="flex-1 relative">
         <input
           ref={inputRef}
@@ -169,7 +169,7 @@ export default function DiagnosisAutocomplete({
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder="Diagnosis..."
-          className="w-full px-6 py-4 rounded-lg text-lg font-baloo-2 bg-white bg-opacity-90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          className="w-full px-3 sm:px-6 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-baloo-2 bg-white bg-opacity-90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"
           autoComplete="off"
         />
 
@@ -222,7 +222,7 @@ export default function DiagnosisAutocomplete({
 
       <button
         onClick={handleSubmit}
-        className="px-8 py-4 bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] hover:from-[#f59e0b] hover:to-[#f59e0b] text-black font-bold font-baloo-2 text-lg rounded-lg transition-all shadow-lg"
+        className="px-4 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] hover:from-[#f59e0b] hover:to-[#f59e0b] text-black font-bold font-baloo-2 text-base sm:text-lg rounded-lg transition-all shadow-lg"
       >
         Submit
       </button>

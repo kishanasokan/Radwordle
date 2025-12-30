@@ -235,49 +235,49 @@ function ResultsModal({
       onClick={onClose}
     >
       <div
-        className="bg-gradient-to-b from-[#1e3a5f] to-[#0f1c2e] rounded-lg p-8 max-w-md w-full shadow-2xl"
+        className="bg-gradient-to-b from-[#1e3a5f] to-[#0f1c2e] rounded-lg p-4 sm:p-8 max-w-md w-full shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-3xl font-bold text-white text-center mb-4">
+        <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-4">
           {isWon ? '🎉 Congratulations!' : '😔 Game Over'}
         </h2>
 
         <div className="text-white text-center mb-6">
           {isWon ? (
-            <p className="text-lg">
+            <p className="text-base sm:text-lg">
               You solved {isArchive ? 'Archive ' : ''}Day {dayNumber + 1} in {guessCount}{' '}
               {guessCount === 1 ? 'guess' : 'guesses'}!
             </p>
           ) : (
-            <p className="text-lg">
+            <p className="text-base sm:text-lg">
               The correct answer was: <strong>{correctAnswer}</strong>
             </p>
           )}
         </div>
 
         {/* Statistics */}
-        <div className="bg-white bg-opacity-10 rounded-lg p-6 mb-6">
-          <h3 className="text-xl font-bold text-white text-center mb-4">Statistics</h3>
-          <div className="grid grid-cols-4 gap-4 text-center">
+        <div className="bg-white bg-opacity-10 rounded-lg p-4 sm:p-6 mb-6">
+          <h3 className="text-lg sm:text-xl font-bold text-white text-center mb-4">Statistics</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-center">
             <div>
-              <p className="text-3xl font-bold text-yellow-400">{stats.gamesPlayed}</p>
-              <p className="text-sm text-gray-300">Played</p>
+              <p className="text-2xl sm:text-3xl font-bold text-yellow-400">{stats.gamesPlayed}</p>
+              <p className="text-xs sm:text-sm text-gray-300">Played</p>
             </div>
             <div>
-              <p className="text-3xl font-bold text-yellow-400">
+              <p className="text-2xl sm:text-3xl font-bold text-yellow-400">
                 {stats.gamesPlayed > 0
                   ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100)
                   : 0}
               </p>
-              <p className="text-sm text-gray-300">Win %</p>
+              <p className="text-xs sm:text-sm text-gray-300">Win %</p>
             </div>
             <div>
-              <p className="text-3xl font-bold text-yellow-400">{stats.currentStreak}</p>
-              <p className="text-sm text-gray-300">Current Streak</p>
+              <p className="text-2xl sm:text-3xl font-bold text-yellow-400">{stats.currentStreak}</p>
+              <p className="text-xs sm:text-sm text-gray-300">Current Streak</p>
             </div>
             <div>
-              <p className="text-3xl font-bold text-yellow-400">{stats.maxStreak}</p>
-              <p className="text-sm text-gray-300">Max Streak</p>
+              <p className="text-2xl sm:text-3xl font-bold text-yellow-400">{stats.maxStreak}</p>
+              <p className="text-xs sm:text-sm text-gray-300">Max Streak</p>
             </div>
           </div>
         </div>

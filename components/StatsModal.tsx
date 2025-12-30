@@ -47,21 +47,21 @@ export default function StatsModal({ isOpen, onClose, stats }: StatsModalProps) 
         </h2>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-4 gap-2 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-8">
           <div className="text-center p-2 border border-gray-200 rounded-lg">
-            <p className="text-3xl font-bold text-gray-800">{stats.gamesPlayed}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-gray-800">{stats.gamesPlayed}</p>
             <p className="text-xs text-gray-500 uppercase">Games Played</p>
           </div>
           <div className="text-center p-2 border border-gray-200 rounded-lg">
-            <p className="text-3xl font-bold text-gray-800">{winRate}%</p>
+            <p className="text-2xl sm:text-3xl font-bold text-gray-800">{winRate}%</p>
             <p className="text-xs text-gray-500 uppercase">Win Rate</p>
           </div>
           <div className="text-center p-2 border border-gray-200 rounded-lg">
-            <p className="text-3xl font-bold text-gray-800">{stats.currentStreak}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-gray-800">{stats.currentStreak}</p>
             <p className="text-xs text-gray-500 uppercase">Current Streak</p>
           </div>
           <div className="text-center p-2 border border-gray-200 rounded-lg">
-            <p className="text-3xl font-bold text-gray-800">{stats.maxStreak}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-gray-800">{stats.maxStreak}</p>
             <p className="text-xs text-gray-500 uppercase">Longest Streak</p>
           </div>
         </div>
