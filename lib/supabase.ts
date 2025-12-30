@@ -303,3 +303,34 @@ export async function getTodaysPuzzle(): Promise<Puzzle> {
   const dayNumber = getDayNumber();
   return getPuzzleForDay(dayNumber);
 }
+
+// ============================================
+// Game Results Functions
+// ============================================
+
+export interface GameResultInput {
+  puzzle_number: number;
+  won: boolean;
+  guess_count: number;
+  hints_used: number;
+  guesses: string[];
+}
+
+/**
+ * Submits a game result to the database.
+ * Called when a game ends (win or loss).
+ */
+export async function submitGameResult(result: GameResultInput): Promise<void> {
+  const { error } = await supabase.from('game_results').insert({
+    puzzle_number: result.puzzle_number,
+    won: result.won,
+    guess_count: result.guess_count,
+    hints_used: result.hints_used,
+    guesses: result.guesses,
+  });
+
+  if (error) {
+    console.error('Error submitting game result:', error);
+    // Don't throw - we don't want to break the game if analytics fail
+  }
+}

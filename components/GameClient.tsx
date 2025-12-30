@@ -13,10 +13,12 @@ import {
   getStatistics,
   type GameState,
 } from '@/lib/localStorage';
+import { submitGameResult } from '@/lib/supabase';
 
 interface GameClientProps {
   conditions: Condition[];
   dayNumber: number;
+  puzzleNumber: number;
   correctAnswer: string;
   isArchive: boolean;
   onGameStateChange: (state: GameState) => void;
@@ -25,6 +27,7 @@ interface GameClientProps {
 export default function GameClient({
   conditions,
   dayNumber,
+  puzzleNumber,
   correctAnswer,
   isArchive,
   onGameStateChange,
@@ -85,6 +88,14 @@ export default function GameClient({
         } else {
           updateStatistics(true, newGuesses.length, dayNumber);
         }
+        // Submit to global analytics
+        submitGameResult({
+          puzzle_number: puzzleNumber,
+          won: true,
+          guess_count: newGuesses.length,
+          hints_used: gameState.revealedHints,
+          guesses: newGuesses,
+        });
         setShowModal(true);
       } else if (newGuesses.length >= MAX_GUESSES) {
         // Loss condition
@@ -100,6 +111,14 @@ export default function GameClient({
         } else {
           updateStatistics(false, newGuesses.length, dayNumber);
         }
+        // Submit to global analytics
+        submitGameResult({
+          puzzle_number: puzzleNumber,
+          won: false,
+          guess_count: newGuesses.length,
+          hints_used: gameState.revealedHints,
+          guesses: newGuesses,
+        });
         setShowModal(true);
       } else {
         // Incorrect or partial - reveal next hint
@@ -117,7 +136,7 @@ export default function GameClient({
       saveGameState(newState);
       onGameStateChange(newState);
     },
-    [gameState, correctAnswer, onGameStateChange, isArchive, dayNumber]
+    [gameState, correctAnswer, onGameStateChange, isArchive, dayNumber, puzzleNumber]
   );
 
   const handleDropdownStateChange = useCallback((isOpen: boolean) => {

@@ -188,6 +188,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
           <GameClient
             conditions={conditions}
             dayNumber={dayNumber}
+            puzzleNumber={puzzle.puzzle_number}
             correctAnswer={puzzle.answer}
             isArchive={isArchive}
             onGameStateChange={handleGameStateChange}
