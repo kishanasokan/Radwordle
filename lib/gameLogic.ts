@@ -5,18 +5,31 @@ export const MAX_GUESSES = 5;
 const EPOCH = new Date('2025-12-29T00:00:00-05:00'); // Midnight EST
 
 /**
- * Returns the current day number based on EST timezone.
+ * Returns the current day number based on America/New_York timezone.
  * Day 0 = Dec 29, 2025, Day 1 = Dec 30, 2025, etc.
+ * Handles both EST (UTC-5) and EDT (UTC-4) automatically.
  */
 export function getDayNumber(): number {
   const now = new Date();
 
-  // Get current date in EST
-  const estDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-  const estMidnight = new Date(estDate.getFullYear(), estDate.getMonth(), estDate.getDate());
+  // Get current date in America/New_York timezone
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+
+  // Returns YYYY-MM-DD format
+  const [year, month, day] = formatter.format(now).split('-').map(Number);
 
   const msPerDay = 24 * 60 * 60 * 1000;
-  return Math.floor((estMidnight.getTime() - EPOCH.getTime()) / msPerDay);
+
+  // Calculate day difference using UTC dates (avoids timezone issues)
+  const todayDays = Math.floor(Date.UTC(year, month - 1, day) / msPerDay);
+  const epochDays = Math.floor(Date.UTC(2025, 11, 29) / msPerDay); // Dec 29, 2025
+
+  return todayDays - epochDays;
 }
 
 /**
