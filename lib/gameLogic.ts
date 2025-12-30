@@ -1,15 +1,42 @@
 export const MAX_GUESSES = 6;
 
-export function getDayNumber(date: Date = new Date()): number {
-  const gameEpoch = new Date(process.env.NEXT_PUBLIC_GAME_EPOCH || '2025-01-01');
+// Hardcoded epoch: January 1, 2025
+const EPOCH_YEAR = 2025;
+const EPOCH_MONTH = 0; // January (0-indexed)
+const EPOCH_DAY = 1;
+const RESET_HOUR_UTC = 5; // 5 AM UTC = midnight EST
+
+/**
+ * Returns the current day number based on UTC time with a fixed epoch.
+ * - Epoch: January 1, 2025
+ * - Reset time: 5 AM UTC (midnight EST)
+ * - Day 0 = Jan 1, 2025
+ */
+export function getDayNumber(): number {
+  const now = new Date();
+
+  // Shift time back by reset hour to determine which "game day" we're in
+  const adjustedTime = new Date(now.getTime() - RESET_HOUR_UTC * 60 * 60 * 1000);
+
+  const epochDate = Date.UTC(EPOCH_YEAR, EPOCH_MONTH, EPOCH_DAY);
+  const todayDate = Date.UTC(
+    adjustedTime.getUTCFullYear(),
+    adjustedTime.getUTCMonth(),
+    adjustedTime.getUTCDate()
+  );
+
   const msPerDay = 24 * 60 * 60 * 1000;
-  const daysSinceEpoch = Math.floor((date.getTime() - gameEpoch.getTime()) / msPerDay);
-  return daysSinceEpoch;
+  return Math.floor((todayDate - epochDate) / msPerDay);
 }
 
-export function getTodaysPuzzleNumber(totalPuzzles: number, date: Date = new Date()): number {
-  const dayNumber = getDayNumber(date);
-  return (dayNumber % totalPuzzles) + 1;
+/**
+ * Converts a day number back to its corresponding date.
+ * Useful for displaying dates in the archive.
+ */
+export function dayNumberToDate(dayNumber: number): Date {
+  const epochDate = Date.UTC(EPOCH_YEAR, EPOCH_MONTH, EPOCH_DAY);
+  const msPerDay = 24 * 60 * 60 * 1000;
+  return new Date(epochDate + dayNumber * msPerDay);
 }
 
 /**
