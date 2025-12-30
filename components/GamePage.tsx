@@ -47,12 +47,24 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
     <div className="min-h-screen relative overflow-y-auto overflow-x-hidden">
       {/* Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#1a2e5a] via-[#233b6e] to-[#1a2e5a]">
-        {/* Background decorative medical images - mildly overlapped behind content */}
-        <div className="absolute inset-0 opacity-20 flex items-end justify-center pb-8">
+        {/* Background decorative medical images - horizontal on desktop, vertical on mobile */}
+        {/* Desktop layout - horizontal */}
+        <div className="hidden sm:flex absolute inset-0 opacity-20 items-end justify-center pb-8">
           <div className="relative w-[900px] h-[500px]">
             <div className="absolute left-0 top-1/2 w-96 h-96 bg-[url('/placeholder-xray.png')] bg-contain bg-no-repeat opacity-40" style={{ transform: 'translateY(-50%) rotate(-8deg)' }}></div>
             <div className="absolute left-1/2 top-1/2 w-80 h-80 bg-[url('/placeholder-scan.png')] bg-contain bg-no-repeat opacity-35" style={{ transform: 'translate(-50%, -50%) rotate(5deg)' }}></div>
             <div className="absolute right-0 top-1/2 w-72 h-72 bg-[url('/placeholder-ct.png')] bg-contain bg-no-repeat opacity-30 rounded-full" style={{ transform: 'translateY(-50%) rotate(-12deg)' }}></div>
+          </div>
+        </div>
+        {/* Mobile layout - triangle arrangement behind hint/guess area (bottom half of screen) */}
+        <div className="flex sm:hidden absolute inset-0 opacity-20">
+          <div className="absolute bottom-0 left-0 right-0 h-[55%]">
+            {/* Top center image */}
+            <div className="absolute left-1/2 top-[0%] w-72 h-72 bg-[url('/placeholder-xray.png')] bg-contain bg-no-repeat opacity-40" style={{ transform: 'translateX(-50%) rotate(-8deg)' }}></div>
+            {/* Bottom left image */}
+            <div className="absolute left-[5%] bottom-[5%] w-64 h-64 bg-[url('/placeholder-scan.png')] bg-contain bg-no-repeat opacity-35" style={{ transform: 'rotate(5deg)' }}></div>
+            {/* Bottom right image */}
+            <div className="absolute right-[5%] bottom-[5%] w-64 h-64 bg-[url('/placeholder-ct.png')] bg-contain bg-no-repeat opacity-30 rounded-full" style={{ transform: 'rotate(-12deg)' }}></div>
           </div>
         </div>
 
@@ -68,40 +80,59 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Header with Logo and Buttons */}
-        <div className="flex justify-between items-center p-3 sm:p-6">
-          {/* Archives Button */}
-          <Link
-            href="/archive"
-            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
-          >
-            <span className="text-base sm:text-xl">📁</span>
-            <span className="font-bold font-baloo-2 text-xs sm:text-base">Archives</span>
-          </Link>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-3 sm:p-6 gap-2 sm:gap-0">
+          {/* Top row on mobile: Archives and Stats buttons */}
+          <div className="flex justify-between items-center sm:contents">
+            {/* Archives Button */}
+            <Link
+              href="/archive"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
+            >
+              <span className="text-base sm:text-xl">📁</span>
+              <span className="font-bold font-baloo-2 text-xs sm:text-base">Archives</span>
+            </Link>
 
-          {/* Logo and Title - Centered */}
-          <div className="flex items-center gap-0.5 sm:gap-1 drop-shadow-[0_6px_20px_rgba(0,0,0,0.6)]">
-            <div className="relative w-8 h-8 sm:w-16 sm:h-16">
+            {/* Logo and Title - Hidden on mobile, shown inline on larger screens */}
+            <div className="hidden sm:flex items-center gap-1 drop-shadow-[0_6px_20px_rgba(0,0,0,0.6)]">
+              <div className="relative w-16 h-16">
+                <Image
+                  src="/radle_icon.svg"
+                  alt="Radiordle Icon"
+                  width={64}
+                  height={64}
+                  className="object-contain"
+                />
+              </div>
+              <h1 className="text-3xl md:text-[3.375rem] text-white font-baloo-2 font-extrabold tracking-tight">
+                Radiordle
+              </h1>
+            </div>
+
+            {/* Stats Button */}
+            <button
+              onClick={() => setShowStats(true)}
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
+            >
+              <span className="text-base sm:text-xl">📊</span>
+              <span className="font-bold font-baloo-2 text-xs sm:text-base">Stats</span>
+            </button>
+          </div>
+
+          {/* Logo and Title - Second row on mobile only */}
+          <div className="flex sm:hidden items-center justify-center gap-1 drop-shadow-[0_6px_20px_rgba(0,0,0,0.6)]">
+            <div className="relative w-[72px] h-[72px]">
               <Image
                 src="/radle_icon.svg"
                 alt="Radiordle Icon"
-                width={64}
-                height={64}
+                width={72}
+                height={72}
                 className="object-contain"
               />
             </div>
-            <h1 className="text-xl sm:text-3xl md:text-[3.375rem] text-white font-baloo-2 font-extrabold tracking-tight">
+            <h1 className="text-[3.25rem] text-white font-baloo-2 font-extrabold tracking-tight">
               Radiordle
             </h1>
           </div>
-
-          {/* Stats Button */}
-          <button
-            onClick={() => setShowStats(true)}
-            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
-          >
-            <span className="text-base sm:text-xl">📊</span>
-            <span className="font-bold font-baloo-2 text-xs sm:text-base">Stats</span>
-          </button>
         </div>
 
         {/* Stats Modal */}
@@ -135,7 +166,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
           </div>
 
           {/* Question */}
-          <h2 className="text-xl sm:text-2xl md:text-[2.025rem] text-white font-bold font-baloo-2 mb-1">
+          <h2 className="text-2xl sm:text-3xl md:text-[2.025rem] text-white font-bold font-baloo-2 mb-1 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
             What&apos;s the Diagnosis?
           </h2>
 

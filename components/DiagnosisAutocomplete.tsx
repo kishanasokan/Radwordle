@@ -8,13 +8,15 @@ interface DiagnosisAutocompleteProps {
   onSubmit: (diagnosis: string) => void;
   onDropdownStateChange: (isOpen: boolean) => void;
   previousGuesses?: string[];
+  isMobile?: boolean;
 }
 
 export default function DiagnosisAutocomplete({
   conditions,
   onSubmit,
   onDropdownStateChange,
-  previousGuesses = []
+  previousGuesses = [],
+  isMobile = false
 }: DiagnosisAutocompleteProps) {
   const [inputValue, setInputValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -137,14 +139,14 @@ export default function DiagnosisAutocomplete({
     const isDropdownVisible = isOpen && filteredConditions.length > 0;
     onDropdownStateChange(isDropdownVisible);
 
-    // When dropdown opens, scroll to ensure dropdown options are visible
-    if (isDropdownVisible && dropdownRef.current) {
+    // When dropdown opens, scroll to ensure dropdown options are visible (desktop only)
+    if (isDropdownVisible && dropdownRef.current && !isMobile) {
       // Small delay to allow the dropdown to render and parent padding to be applied
       setTimeout(() => {
         dropdownRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }, 100);
     }
-  }, [isOpen, filteredConditions.length, onDropdownStateChange]);
+  }, [isOpen, filteredConditions.length, onDropdownStateChange, isMobile]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -184,10 +186,12 @@ export default function DiagnosisAutocomplete({
           autoComplete="off"
         />
 
-        {/* Dropdown menu */}
+        {/* Dropdown menu - appears above on mobile, below on desktop */}
         {isOpen && filteredConditions.length > 0 && (
           <div
-            className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 overflow-hidden"
+            className={`absolute left-0 right-0 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 overflow-hidden ${
+              isMobile ? 'bottom-full mb-2' : 'top-full mt-2'
+            }`}
           >
             <div
               ref={dropdownRef}

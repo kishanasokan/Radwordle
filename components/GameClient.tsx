@@ -154,7 +154,8 @@ export default function GameClient({
 
   return (
     <>
-      <div className={`w-full transition-all duration-300 ${isDropdownOpen ? 'pb-[200px]' : ''}`}>
+      {/* Desktop layout - normal flow */}
+      <div className={`hidden sm:block w-full transition-all duration-300 ${isDropdownOpen ? 'pb-[200px]' : ''}`}>
         {gameState.isComplete ? (
           <div className="text-center text-white text-xl font-baloo-2">
             {gameState.isWon ? (
@@ -177,7 +178,7 @@ export default function GameClient({
           </div>
         ) : (
           <>
-            <div className="mb-4 text-white text-center">
+            <div className="mb-4 text-white text-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
               <p className="text-[1.237rem] font-baloo-2">
                 Guesses: {gameState.guesses.length} / {MAX_GUESSES}
               </p>
@@ -188,6 +189,52 @@ export default function GameClient({
               onDropdownStateChange={handleDropdownStateChange}
               previousGuesses={gameState.guesses}
             />
+          </>
+        )}
+      </div>
+
+      {/* Mobile layout - fixed input at bottom */}
+      <div className="sm:hidden w-full">
+        {gameState.isComplete ? (
+          <div className="text-center text-white text-xl font-baloo-2">
+            {gameState.isWon ? (
+              <>
+                <p>Congratulations! The answer was:</p>
+                <p className="text-2xl mt-1">{correctAnswer}</p>
+              </>
+            ) : (
+              <>
+                <p>Game Over. The answer was:</p>
+                <p className="text-2xl mt-1">{correctAnswer}</p>
+              </>
+            )}
+            <button
+              onClick={() => setShowModal(true)}
+              className="mt-4 px-6 py-2 bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] hover:from-[#f59e0b] hover:to-[#f59e0b] text-black font-bold font-baloo-2 rounded-lg transition-all shadow-lg"
+            >
+              View Results
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Guesses counter - in flow */}
+            <div className="mb-4 text-white text-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
+              <p className="text-[1.237rem] font-baloo-2">
+                Guesses: {gameState.guesses.length} / {MAX_GUESSES}
+              </p>
+            </div>
+            {/* Spacer for fixed input area */}
+            <div className="h-[140px]"></div>
+            {/* Fixed input area at bottom */}
+            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#0f1c2e] via-[#1a2e5a] to-transparent pt-6 pb-4 px-4 z-40">
+              <DiagnosisAutocomplete
+                conditions={conditions}
+                onSubmit={handleSubmit}
+                onDropdownStateChange={handleDropdownStateChange}
+                previousGuesses={gameState.guesses}
+                isMobile={true}
+              />
+            </div>
           </>
         )}
       </div>

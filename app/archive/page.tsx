@@ -20,34 +20,32 @@ export default function ArchivePage() {
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Header */}
-        <div className="flex justify-between items-center p-6">
+        <div className="flex justify-between items-center p-4 sm:p-6">
           {/* Back Button */}
           <Link
             href="/"
-            className="flex items-center gap-2 px-4 py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
+            className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors flex-shrink-0"
           >
-            <span className="text-xl">←</span>
-            <span className="font-bold font-baloo-2">Back</span>
+            <span className="text-xl sm:text-2xl">←</span>
           </Link>
 
           {/* Logo and Title - Centered */}
           <div className="flex items-center gap-1 drop-shadow-[0_6px_20px_rgba(0,0,0,0.6)]">
-            <div className="relative w-16 h-16">
+            <div className="relative w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 flex-shrink-0">
               <Image
                 src="/radle_icon.svg"
                 alt="Radiordle Icon"
-                width={64}
-                height={64}
+                fill
                 className="object-contain"
               />
             </div>
-            <h1 className="text-[3.375rem] text-white font-baloo-2 font-extrabold tracking-tight">
+            <h1 className="text-2xl sm:text-4xl md:text-[3.375rem] text-white font-baloo-2 font-extrabold tracking-tight">
               Radiordle
             </h1>
           </div>
 
           {/* Spacer for centering */}
-          <div className="w-[100px]"></div>
+          <div className="w-10 sm:w-12"></div>
         </div>
 
         {/* Archive Title */}
