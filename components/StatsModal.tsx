@@ -1,7 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Statistics } from '@/lib/localStorage';
 import { MAX_GUESSES } from '@/lib/gameLogic';
+import { getGlobalStats, calculatePercentileBeat, GlobalStats } from '@/lib/supabase';
 
 interface StatsModalProps {
   isOpen: boolean;
@@ -10,6 +12,25 @@ interface StatsModalProps {
 }
 
 export default function StatsModal({ isOpen, onClose, stats }: StatsModalProps) {
+  const [globalStats, setGlobalStats] = useState<GlobalStats | null>(null);
+  const [percentileBeat, setPercentileBeat] = useState<number | null>(null);
+
+  // Fetch global stats when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      getGlobalStats().then((global) => {
+        setGlobalStats(global);
+        if (global && stats.guessDistribution) {
+          const percentile = calculatePercentileBeat(
+            stats.guessDistribution,
+            global.guessDistribution
+          );
+          setPercentileBeat(percentile);
+        }
+      });
+    }
+  }, [isOpen, stats.guessDistribution]);
+
   if (!isOpen) return null;
 
   const winRate = stats.gamesPlayed > 0
@@ -94,6 +115,49 @@ export default function StatsModal({ isOpen, onClose, stats }: StatsModalProps) 
             })}
           </div>
         </div>
+
+        {/* Global Comparison */}
+        {stats.gamesWon > 0 && (
+          <div className="mt-6 border border-gray-200 rounded-lg p-4 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <h3 className="text-lg font-bold text-center text-gray-800 mb-3">
+              How You Compare
+            </h3>
+            {percentileBeat !== null ? (
+              <div className="text-center">
+                <p className="text-3xl font-bold text-indigo-600">
+                  Top {100 - percentileBeat}%
+                </p>
+                <p className="text-sm text-gray-600 mt-1">
+                  You beat <span className="font-semibold">{percentileBeat}%</span> of players based on guess count
+                </p>
+              </div>
+            ) : globalStats === null ? (
+              <p className="text-center text-gray-500 text-sm">Loading global stats...</p>
+            ) : (
+              <p className="text-center text-gray-500 text-sm">Not enough data yet</p>
+            )}
+            {globalStats && (
+              <div className="mt-4 grid grid-cols-2 gap-3 text-center text-sm">
+                <div>
+                  <p className="text-gray-500">Global Win Rate</p>
+                  <p className="font-bold text-gray-700">{globalStats.winRate}%</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Your Win Rate</p>
+                  <p className="font-bold text-gray-700">{winRate}%</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Global Avg Guesses</p>
+                  <p className="font-bold text-gray-700">{globalStats.avgGuesses.toFixed(1)}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Total Players</p>
+                  <p className="font-bold text-gray-700">{globalStats.totalGames.toLocaleString()}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -334,3 +334,97 @@ export async function submitGameResult(result: GameResultInput): Promise<void> {
     // Don't throw - we don't want to break the game if analytics fail
   }
 }
+
+export interface GlobalStats {
+  totalGames: number;
+  totalWins: number;
+  winRate: number;
+  avgGuesses: number;
+  guessDistribution: { [key: number]: number };
+}
+
+/**
+ * Fetches global statistics from all players.
+ * Used to compare individual performance against the community.
+ */
+export async function getGlobalStats(): Promise<GlobalStats | null> {
+  try {
+    // Get overall stats
+    const { data: overall, error: overallError } = await supabase
+      .from('game_stats_overall')
+      .select('*')
+      .single();
+
+    if (overallError) {
+      console.error('Error fetching global stats:', overallError);
+      return null;
+    }
+
+    // Get guess distribution
+    const { data: distribution, error: distError } = await supabase
+      .from('game_stats_guess_distribution')
+      .select('*');
+
+    if (distError) {
+      console.error('Error fetching guess distribution:', distError);
+      return null;
+    }
+
+    // Convert distribution array to object
+    const guessDistribution: { [key: number]: number } = {};
+    distribution?.forEach((row: { guess_count: number; wins: number }) => {
+      guessDistribution[row.guess_count] = row.wins;
+    });
+
+    return {
+      totalGames: overall?.total_games || 0,
+      totalWins: overall?.total_wins || 0,
+      winRate: Number(overall?.win_rate) || 0,
+      avgGuesses: Number(overall?.avg_guesses) || 0,
+      guessDistribution,
+    };
+  } catch (error) {
+    console.error('Error fetching global stats:', error);
+    return null;
+  }
+}
+
+/**
+ * Calculates what percentage of players you beat based on your average guess count.
+ * If you win in fewer guesses, you beat more players.
+ */
+export function calculatePercentileBeat(
+  userGuessDistribution: { [key: number]: number },
+  globalGuessDistribution: { [key: number]: number }
+): number | null {
+  // Calculate user's total wins and weighted average
+  let userTotalWins = 0;
+  let userWeightedSum = 0;
+  for (const [guess, count] of Object.entries(userGuessDistribution)) {
+    userTotalWins += count;
+    userWeightedSum += Number(guess) * count;
+  }
+
+  if (userTotalWins === 0) return null;
+
+  const userAvgGuesses = userWeightedSum / userTotalWins;
+
+  // Calculate global total wins
+  let globalTotalWins = 0;
+  for (const count of Object.values(globalGuessDistribution)) {
+    globalTotalWins += count;
+  }
+
+  if (globalTotalWins === 0) return null;
+
+  // Count how many global wins took MORE guesses than user's average
+  let worseThanUser = 0;
+  for (const [guess, count] of Object.entries(globalGuessDistribution)) {
+    if (Number(guess) > userAvgGuesses) {
+      worseThanUser += count;
+    }
+  }
+
+  // Percentage of players the user beat
+  return Math.round((worseThanUser / globalTotalWins) * 100);
+}
