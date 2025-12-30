@@ -2,6 +2,9 @@ import { getTodaysPuzzle, getHintsForPuzzle, getAllConditions } from '@/lib/supa
 import { getDayNumber } from '@/lib/gameLogic';
 import GamePage from '@/components/GamePage';
 
+// Disable caching - puzzle changes daily at midnight EST
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   try {
     const dayNumber = getDayNumber();
