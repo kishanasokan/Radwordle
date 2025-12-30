@@ -43,13 +43,24 @@ export default function StatsModal({ isOpen, onClose, stats }: StatsModalProps) 
     1 // Prevent division by zero
   );
 
+  // Calculate user's average guesses (only counting wins)
+  const userAvgGuesses = (() => {
+    let totalGuesses = 0;
+    let totalWins = 0;
+    for (const [guessNum, count] of Object.entries(stats.guessDistribution)) {
+      totalGuesses += parseInt(guessNum) * count;
+      totalWins += count;
+    }
+    return totalWins > 0 ? totalGuesses / totalWins : 0;
+  })();
+
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl"
+        className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
@@ -147,12 +158,12 @@ export default function StatsModal({ isOpen, onClose, stats }: StatsModalProps) 
                   <p className="font-bold text-gray-700">{winRate}%</p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Global Avg Guesses</p>
+                  <p className="text-gray-500">Global Avg Guess #</p>
                   <p className="font-bold text-gray-700">{globalStats.avgGuesses.toFixed(1)}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Total Players</p>
-                  <p className="font-bold text-gray-700">{globalStats.totalGames.toLocaleString()}</p>
+                  <p className="text-gray-500">Your Avg Guess #</p>
+                  <p className="font-bold text-gray-700">{userAvgGuesses.toFixed(1)}</p>
                 </div>
               </div>
             )}
