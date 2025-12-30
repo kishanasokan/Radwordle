@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Puzzle, Hint, Condition } from '@/lib/supabase';
 import GameClient from './GameClient';
 import { GameState } from '@/lib/localStorage';
@@ -10,9 +11,11 @@ interface GamePageProps {
   puzzle: Puzzle;
   hints: Hint[];
   conditions: Condition[];
+  dayNumber: number;
+  isArchive: boolean;
 }
 
-export default function GamePage({ puzzle, hints, conditions }: GamePageProps) {
+export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchive }: GamePageProps) {
   const [gameState, setGameState] = useState<GameState | null>(null);
 
   const handleGameStateChange = useCallback((state: GameState) => {
@@ -49,10 +52,13 @@ export default function GamePage({ puzzle, hints, conditions }: GamePageProps) {
         {/* Header with Logo and Buttons */}
         <div className="flex justify-between items-center p-6">
           {/* Archives Button */}
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors">
+          <Link
+            href="/archive"
+            className="flex items-center gap-2 px-4 py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
+          >
             <span className="text-xl">📁</span>
             <span className="font-bold font-baloo-2">Archives</span>
-          </button>
+          </Link>
 
           {/* Logo and Title - Centered */}
           <div className="flex items-center gap-1">
@@ -157,8 +163,9 @@ export default function GamePage({ puzzle, hints, conditions }: GamePageProps) {
           {/* Input and Submit */}
           <GameClient
             conditions={conditions}
-            puzzleNumber={puzzle.puzzle_number}
+            dayNumber={dayNumber}
             correctAnswer={puzzle.answer}
+            isArchive={isArchive}
             onGameStateChange={handleGameStateChange}
           />
         </div>

@@ -9,21 +9,24 @@ import {
   getGameState,
   saveGameState,
   updateStatistics,
+  updateArchiveStatistics,
   getStatistics,
   type GameState,
 } from '@/lib/localStorage';
 
 interface GameClientProps {
   conditions: Condition[];
-  puzzleNumber: number;
+  dayNumber: number;
   correctAnswer: string;
+  isArchive: boolean;
   onGameStateChange: (state: GameState) => void;
 }
 
 export default function GameClient({
   conditions,
-  puzzleNumber,
+  dayNumber,
   correctAnswer,
+  isArchive,
   onGameStateChange,
 }: GameClientProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -32,7 +35,7 @@ export default function GameClient({
 
   // Initialize game state from localStorage
   useEffect(() => {
-    const savedState = getGameState(puzzleNumber);
+    const savedState = getGameState(dayNumber);
 
     if (savedState) {
       setGameState(savedState);
@@ -45,7 +48,7 @@ export default function GameClient({
     } else {
       // Initialize new game state
       const newState: GameState = {
-        puzzleNumber,
+        dayNumber,
         guesses: [],
         guessResults: [],
         revealedHints: 0,
@@ -56,7 +59,7 @@ export default function GameClient({
       setGameState(newState);
       onGameStateChange(newState);
     }
-  }, [puzzleNumber, onGameStateChange]);
+  }, [dayNumber, onGameStateChange]);
 
   const handleSubmit = useCallback(
     (diagnosis: string) => {
@@ -77,7 +80,11 @@ export default function GameClient({
           isComplete: true,
           isWon: true,
         };
-        updateStatistics(true, newGuesses.length);
+        if (isArchive) {
+          updateArchiveStatistics(true, newGuesses.length);
+        } else {
+          updateStatistics(true, newGuesses.length, dayNumber);
+        }
         setShowModal(true);
       } else if (newGuesses.length >= MAX_GUESSES) {
         // Loss condition
@@ -88,7 +95,11 @@ export default function GameClient({
           isComplete: true,
           isWon: false,
         };
-        updateStatistics(false, newGuesses.length);
+        if (isArchive) {
+          updateArchiveStatistics(false, newGuesses.length);
+        } else {
+          updateStatistics(false, newGuesses.length, dayNumber);
+        }
         setShowModal(true);
       } else {
         // Incorrect or partial - reveal next hint
@@ -106,7 +117,7 @@ export default function GameClient({
       saveGameState(newState);
       onGameStateChange(newState);
     },
-    [gameState, correctAnswer, onGameStateChange]
+    [gameState, correctAnswer, onGameStateChange, isArchive, dayNumber]
   );
 
   const handleDropdownStateChange = useCallback((isOpen: boolean) => {
@@ -159,7 +170,8 @@ export default function GameClient({
           guessCount={gameState.guesses.length}
           guesses={gameState.guesses}
           correctAnswer={correctAnswer}
-          puzzleNumber={puzzleNumber}
+          dayNumber={dayNumber}
+          isArchive={isArchive}
           onClose={handleCloseModal}
         />
       )}
@@ -172,7 +184,8 @@ interface ResultsModalProps {
   guessCount: number;
   guesses: string[];
   correctAnswer: string;
-  puzzleNumber: number;
+  dayNumber: number;
+  isArchive: boolean;
   onClose: () => void;
 }
 
@@ -181,7 +194,8 @@ function ResultsModal({
   guessCount,
   guesses,
   correctAnswer,
-  puzzleNumber,
+  dayNumber,
+  isArchive,
   onClose,
 }: ResultsModalProps) {
   const stats = getStatistics();
@@ -201,7 +215,9 @@ function ResultsModal({
     const unusedBoxes = '⬛'.repeat(MAX_GUESSES - guesses.length);
     const fullGrid = emojiGrid + unusedBoxes;
 
-    const shareText = `🩻 Radiordle #${puzzleNumber} ${isWon ? guessCount : 'X'}/${MAX_GUESSES}\n\n${fullGrid}\n\nhttps://radiordle.com`;
+    const displayDay = dayNumber + 1;
+    const prefix = isArchive ? '🩻 Radiordle Archive Day' : '🩻 Radiordle Day';
+    const shareText = `${prefix} ${displayDay} ${isWon ? guessCount : 'X'}/${MAX_GUESSES}\n\n${fullGrid}\n\nhttps://radiordle.com`;
 
     navigator.clipboard.writeText(shareText).then(
       () => {
@@ -211,7 +227,7 @@ function ResultsModal({
         alert('Failed to copy results.');
       }
     );
-  }, [guesses, correctAnswer, puzzleNumber, isWon, guessCount]);
+  }, [guesses, correctAnswer, dayNumber, isWon, guessCount, isArchive]);
 
   return (
     <div
@@ -229,7 +245,7 @@ function ResultsModal({
         <div className="text-white text-center mb-6">
           {isWon ? (
             <p className="text-lg">
-              You solved Radiordle #{puzzleNumber} in {guessCount}{' '}
+              You solved {isArchive ? 'Archive ' : ''}Day {dayNumber + 1} in {guessCount}{' '}
               {guessCount === 1 ? 'guess' : 'guesses'}!
             </p>
           ) : (

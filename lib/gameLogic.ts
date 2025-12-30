@@ -1,42 +1,30 @@
-export const MAX_GUESSES = 6;
+export const MAX_GUESSES = 5;
 
-// Hardcoded epoch: January 1, 2025
-const EPOCH_YEAR = 2025;
-const EPOCH_MONTH = 0; // January (0-indexed)
-const EPOCH_DAY = 1;
-const RESET_HOUR_UTC = 5; // 5 AM UTC = midnight EST
+// Epoch: December 29, 2025 - Day 0 is the first puzzle
+// Uses EST timezone (America/New_York) for consistency
+const EPOCH = new Date('2025-12-29T00:00:00-05:00'); // Midnight EST
 
 /**
- * Returns the current day number based on UTC time with a fixed epoch.
- * - Epoch: January 1, 2025
- * - Reset time: 5 AM UTC (midnight EST)
- * - Day 0 = Jan 1, 2025
+ * Returns the current day number based on EST timezone.
+ * Day 0 = Dec 29, 2025, Day 1 = Dec 30, 2025, etc.
  */
 export function getDayNumber(): number {
   const now = new Date();
 
-  // Shift time back by reset hour to determine which "game day" we're in
-  const adjustedTime = new Date(now.getTime() - RESET_HOUR_UTC * 60 * 60 * 1000);
-
-  const epochDate = Date.UTC(EPOCH_YEAR, EPOCH_MONTH, EPOCH_DAY);
-  const todayDate = Date.UTC(
-    adjustedTime.getUTCFullYear(),
-    adjustedTime.getUTCMonth(),
-    adjustedTime.getUTCDate()
-  );
+  // Get current date in EST
+  const estDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const estMidnight = new Date(estDate.getFullYear(), estDate.getMonth(), estDate.getDate());
 
   const msPerDay = 24 * 60 * 60 * 1000;
-  return Math.floor((todayDate - epochDate) / msPerDay);
+  return Math.floor((estMidnight.getTime() - EPOCH.getTime()) / msPerDay);
 }
 
 /**
  * Converts a day number back to its corresponding date.
- * Useful for displaying dates in the archive.
  */
 export function dayNumberToDate(dayNumber: number): Date {
-  const epochDate = Date.UTC(EPOCH_YEAR, EPOCH_MONTH, EPOCH_DAY);
   const msPerDay = 24 * 60 * 60 * 1000;
-  return new Date(epochDate + dayNumber * msPerDay);
+  return new Date(EPOCH.getTime() + dayNumber * msPerDay);
 }
 
 /**
