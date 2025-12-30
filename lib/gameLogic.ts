@@ -69,6 +69,33 @@ function getSignificantWords(diagnosis: string): string[] {
   return words.filter(word => word.length > 0 && !commonTerms.has(word));
 }
 
+const MIN_PREFIX_LENGTH = 5;
+
+/**
+ * Checks if two words share a common prefix of at least MIN_PREFIX_LENGTH characters.
+ * Used to match related medical terms like "esophagus" and "esophageal".
+ */
+function sharesPrefix(word1: string, word2: string): boolean {
+  if (word1.length < MIN_PREFIX_LENGTH || word2.length < MIN_PREFIX_LENGTH) {
+    return false;
+  }
+  return word1.slice(0, MIN_PREFIX_LENGTH) === word2.slice(0, MIN_PREFIX_LENGTH);
+}
+
+/**
+ * Checks if any word from the guess shares a prefix with any word from the answer.
+ */
+function hasPrefixMatch(guessWords: string[], answerWords: string[]): boolean {
+  for (const guessWord of guessWords) {
+    for (const answerWord of answerWords) {
+      if (sharesPrefix(guessWord, answerWord)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 /**
  * Checks if a guess matches the correct answer
  * Returns: 'correct', 'partial', or 'incorrect'
@@ -86,11 +113,16 @@ export function checkAnswer(guess: string, correctAnswer: string): 'correct' | '
   const guessWords = getSignificantWords(guess);
   const answerWords = getSignificantWords(correctAnswer);
 
-  // Find common words between guess and answer
+  // Find common words between guess and answer (exact word match)
   const commonWords = guessWords.filter(word => answerWords.includes(word));
 
   // Partial match if they share at least one significant word
   if (commonWords.length > 0) {
+    return 'partial';
+  }
+
+  // Check for prefix match (e.g., "esophagus" matches "esophageal")
+  if (hasPrefixMatch(guessWords, answerWords)) {
     return 'partial';
   }
 

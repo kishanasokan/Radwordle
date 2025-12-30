@@ -314,7 +314,7 @@ function ResultsModal({
 
     const displayDay = dayNumber + 1;
     const prefix = isArchive ? '🩻 Radiordle Archive Day' : '🩻 Radiordle Day';
-    const shareText = `${prefix} ${displayDay} ${isWon ? guessCount : 'X'}/${MAX_GUESSES}\n\n${fullGrid}\n\nhttps://radiordle.org`;
+    const shareText = `${prefix} ${displayDay} ${isWon ? guessCount : 'X'}/${MAX_GUESSES}\n${fullGrid}\nhttps://radiordle.org`;
 
     navigator.clipboard.writeText(shareText).then(
       () => {

@@ -36,6 +36,18 @@ export const metadata: Metadata = {
   icons: {
     icon: "/radle_icon.svg",
   },
+  openGraph: {
+    title: "Radiordle",
+    description: "A radiology word guessing game",
+    siteName: "Radiordle",
+    type: "website",
+    url: "https://radiordle.org",
+  },
+  twitter: {
+    card: "summary",
+    title: "Radiordle",
+    description: "A radiology word guessing game",
+  },
 };
 
 export default function RootLayout({
