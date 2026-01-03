@@ -316,11 +316,25 @@ export interface GameResultInput {
   guesses: string[];
 }
 
+export interface GameResultOutput {
+  isFirstSolver: boolean;
+}
+
 /**
  * Submits a game result to the database.
  * Called when a game ends (win or loss).
+ * Returns whether this is the first person to solve this puzzle.
  */
-export async function submitGameResult(result: GameResultInput): Promise<void> {
+export async function submitGameResult(result: GameResultInput): Promise<GameResultOutput> {
+  // Check if anyone has already solved this puzzle (won = true)
+  const { count, error: countError } = await supabase
+    .from('game_results')
+    .select('*', { count: 'exact', head: true })
+    .eq('puzzle_number', result.puzzle_number)
+    .eq('won', true);
+
+  const isFirstSolver = result.won && !countError && count === 0;
+
   const { error } = await supabase.from('game_results').insert({
     puzzle_number: result.puzzle_number,
     won: result.won,
@@ -333,6 +347,8 @@ export async function submitGameResult(result: GameResultInput): Promise<void> {
     console.error('Error submitting game result:', error);
     // Don't throw - we don't want to break the game if analytics fail
   }
+
+  return { isFirstSolver };
 }
 
 export interface GlobalStats {
