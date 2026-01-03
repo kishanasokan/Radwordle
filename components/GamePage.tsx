@@ -43,6 +43,18 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
     ? (gameState.isComplete ? hints : hints.slice(0, gameState.revealedHints))
     : [];
 
+  // Determine image border color based on first guess result
+  // The first guess is made with only the image, so it reflects how helpful the image was
+  const firstGuessResult = gameState?.guessResults[0];
+  let imageBorderStyle = '';
+  if (firstGuessResult === 'correct') {
+    imageBorderStyle = 'ring-4 ring-[#407763] shadow-[0_0_20px_rgba(64,119,99,0.6)]';
+  } else if (firstGuessResult === 'partial') {
+    imageBorderStyle = 'ring-4 ring-[#f6d656] shadow-[0_0_20px_rgba(246,214,86,0.6)]';
+  } else if (firstGuessResult === 'incorrect') {
+    imageBorderStyle = 'ring-4 ring-[#9e4a4a] shadow-[0_0_20px_rgba(158,74,74,0.6)]';
+  }
+
   return (
     <div className="min-h-screen relative overflow-y-auto overflow-x-hidden">
       {/* Gradient Background */}
@@ -147,7 +159,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
 
           {/* Medical Image Display */}
           <div className="w-full max-w-3xl mb-3 sm:mb-8">
-            <div className="relative w-full aspect-[16/9] bg-black rounded-lg overflow-hidden shadow-2xl">
+            <div className={`relative w-full aspect-[16/9] bg-black rounded-lg overflow-hidden shadow-2xl transition-all duration-300 ${imageBorderStyle}`}>
               {puzzle.image_url ? (
                 <Image
                   src={puzzle.image_url}
