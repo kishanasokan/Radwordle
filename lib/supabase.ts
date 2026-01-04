@@ -314,6 +314,7 @@ export interface GameResultInput {
   guess_count: number;
   hints_used: number;
   guesses: string[];
+  player_hash?: string | null;
 }
 
 export interface GameResultOutput {
@@ -341,6 +342,8 @@ export async function submitGameResult(result: GameResultInput): Promise<GameRes
     guess_count: result.guess_count,
     hints_used: result.hints_used,
     guesses: result.guesses,
+    player_hash: result.player_hash,
+    is_first_solver: isFirstSolver,
   });
 
   if (error) {

@@ -11,6 +11,7 @@ import {
   updateStatistics,
   updateArchiveStatistics,
   getStatistics,
+  getPlayerHash,
   type GameState,
 } from '@/lib/localStorage';
 import { submitGameResult } from '@/lib/supabase';
@@ -98,6 +99,7 @@ export default function GameClient({
           guess_count: newGuesses.length,
           hints_used: gameState.revealedHints,
           guesses: newGuesses,
+          player_hash: getPlayerHash(),
         }).then((result) => {
           setIsFirstSolver(result.isFirstSolver);
         });
@@ -123,6 +125,7 @@ export default function GameClient({
           guess_count: newGuesses.length,
           hints_used: gameState.revealedHints,
           guesses: newGuesses,
+          player_hash: getPlayerHash(),
         });
         setShowModal(true);
       } else {
