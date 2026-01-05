@@ -315,16 +315,18 @@ export interface GameResultInput {
   hints_used: number;
   guesses: string[];
   player_hash?: string | null;
+  solve_time_seconds?: number;
 }
 
 export interface GameResultOutput {
   isFirstSolver: boolean;
+  isFastestSolver: boolean;
 }
 
 /**
  * Submits a game result to the database.
  * Called when a game ends (win or loss).
- * Returns whether this is the first person to solve this puzzle.
+ * Returns whether this is the first person to solve this puzzle and/or the fastest.
  */
 export async function submitGameResult(result: GameResultInput): Promise<GameResultOutput> {
   // Check if anyone has already solved this puzzle (won = true)
@@ -336,6 +338,29 @@ export async function submitGameResult(result: GameResultInput): Promise<GameRes
 
   const isFirstSolver = result.won && !countError && count === 0;
 
+  // Check if this is the fastest solver for today's puzzle
+  let isFastestSolver = false;
+  if (result.won && result.solve_time_seconds !== undefined) {
+    // Get the current fastest time for this puzzle
+    const { data: fastestResult, error: fastestError } = await supabase
+      .from('game_results')
+      .select('solve_time_seconds')
+      .eq('puzzle_number', result.puzzle_number)
+      .eq('won', true)
+      .not('solve_time_seconds', 'is', null)
+      .order('solve_time_seconds', { ascending: true })
+      .limit(1)
+      .single();
+
+    // If no previous results or this time is faster, they're the fastest
+    if (fastestError?.code === 'PGRST116' || !fastestResult) {
+      // No previous results with solve time
+      isFastestSolver = true;
+    } else if (fastestResult && result.solve_time_seconds < fastestResult.solve_time_seconds) {
+      isFastestSolver = true;
+    }
+  }
+
   const { error } = await supabase.from('game_results').insert({
     puzzle_number: result.puzzle_number,
     won: result.won,
@@ -344,6 +369,7 @@ export async function submitGameResult(result: GameResultInput): Promise<GameRes
     guesses: result.guesses,
     player_hash: result.player_hash,
     is_first_solver: isFirstSolver,
+    solve_time_seconds: result.solve_time_seconds,
   });
 
   if (error) {
@@ -351,7 +377,7 @@ export async function submitGameResult(result: GameResultInput): Promise<GameRes
     // Don't throw - we don't want to break the game if analytics fail
   }
 
-  return { isFirstSolver };
+  return { isFirstSolver, isFastestSolver };
 }
 
 export interface GlobalStats {

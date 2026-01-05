@@ -40,7 +40,10 @@ export default function GameClient({
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isFirstSolver, setIsFirstSolver] = useState(false);
+  const [isFastestSolver, setIsFastestSolver] = useState(false);
+  const [solveTimeSeconds, setSolveTimeSeconds] = useState<number | null>(null);
   const guessStartTime = useRef<number>(Date.now());
+  const gameStartTime = useRef<number>(Date.now());
 
   // Initialize game state from localStorage
   useEffect(() => {
@@ -101,6 +104,8 @@ export default function GameClient({
           updateStatistics(true, newGuesses.length, dayNumber);
         }
         // Submit to global analytics
+        const totalSolveTime = (Date.now() - gameStartTime.current) / 1000;
+        setSolveTimeSeconds(totalSolveTime);
         submitGameResult({
           puzzle_number: puzzleNumber,
           won: true,
@@ -108,8 +113,10 @@ export default function GameClient({
           hints_used: gameState.revealedHints,
           guesses: newGuesses,
           player_hash: getPlayerHash(),
+          solve_time_seconds: totalSolveTime,
         }).then((result) => {
           setIsFirstSolver(result.isFirstSolver);
+          setIsFastestSolver(result.isFastestSolver);
         });
         setShowModal(true);
       } else if (newGuesses.length >= MAX_GUESSES) {
@@ -262,6 +269,8 @@ export default function GameClient({
           dayNumber={dayNumber}
           isArchive={isArchive}
           isFirstSolver={isFirstSolver}
+          isFastestSolver={isFastestSolver}
+          solveTimeSeconds={solveTimeSeconds}
           onClose={handleCloseModal}
         />
       )}
@@ -277,6 +286,8 @@ interface ResultsModalProps {
   dayNumber: number;
   isArchive: boolean;
   isFirstSolver: boolean;
+  isFastestSolver: boolean;
+  solveTimeSeconds: number | null;
   onClose: () => void;
 }
 
@@ -288,6 +299,8 @@ function ResultsModal({
   dayNumber,
   isArchive,
   isFirstSolver,
+  isFastestSolver,
+  solveTimeSeconds,
   onClose,
 }: ResultsModalProps) {
   const stats = getStatistics();
@@ -380,6 +393,16 @@ function ResultsModal({
           <div className="bg-gradient-to-r from-yellow-500 to-amber-500 rounded-lg px-4 py-3 mb-4 text-center">
             <p className="text-xl font-bold text-black">🏆 First Solver!</p>
             <p className="text-sm text-black/80">You&apos;re the first person to solve Day {dayNumber + 1}!</p>
+          </div>
+        )}
+
+        {isFastestSolver && !isFirstSolver && (
+          <div className="bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg px-4 py-3 mb-4 text-center">
+            <p className="text-xl font-bold text-white">⏱️ Fastest Solver!</p>
+            <p className="text-sm text-white/80">
+              You set the fastest time for Day {dayNumber + 1}
+              {solveTimeSeconds !== null && ` in ${solveTimeSeconds.toFixed(1)}s`}!
+            </p>
           </div>
         )}
 
