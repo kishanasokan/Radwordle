@@ -147,13 +147,6 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
           </div>
         </div>
 
-        {/* Stats Modal */}
-        <StatsModal
-          isOpen={showStats}
-          onClose={() => setShowStats(false)}
-          stats={stats}
-        />
-
         {/* Main Content */}
         <div className="flex-1 flex flex-col items-center justify-start sm:justify-center px-4 pb-4 sm:pb-20">
 
@@ -253,6 +246,13 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
           </div>
         </footer>
       )}
+
+      {/* Stats Modal - Rendered outside z-10 content container to ensure it overlays everything */}
+      <StatsModal
+        isOpen={showStats}
+        onClose={() => setShowStats(false)}
+        stats={stats}
+      />
     </div>
   );
 }
