@@ -34,7 +34,10 @@ export const metadata: Metadata = {
   title: "Radiordle",
   description: "A radiology word guessing game",
   icons: {
-    icon: "/radle_icon.svg",
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/radle_icon.svg", type: "image/svg+xml" },
+    ],
     apple: "/apple-touch-icon.png",
   },
 };
