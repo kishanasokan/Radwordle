@@ -54,6 +54,11 @@ export default function StatsModal({ isOpen, onClose, stats }: StatsModalProps) 
     return totalWins > 0 ? totalGuesses / totalWins : 0;
   })();
 
+  // Calculate average guess time
+  const avgGuessTime = stats.totalGuessCount && stats.totalGuessCount > 0
+    ? (stats.totalGuessTime || 0) / stats.totalGuessCount
+    : 0;
+
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[100] p-4"
@@ -121,7 +126,7 @@ export default function StatsModal({ isOpen, onClose, stats }: StatsModalProps) 
           </div>
         </div>
 
-        {/* Global Comparison */}
+        {/* How You Compare */}
         {stats.gamesWon > 0 && (
           <div className="bg-gradient-to-r from-blue-500 from-10% to-indigo-600 to-90% bg-opacity-20 rounded-lg p-4 sm:p-6 mb-6">
             <h3 className="text-lg sm:text-xl font-bold text-white text-center mb-3">
@@ -141,26 +146,20 @@ export default function StatsModal({ isOpen, onClose, stats }: StatsModalProps) 
             ) : (
               <p className="text-center text-gray-300 text-sm">Not enough data yet</p>
             )}
-            {globalStats && (
-              <div className="mt-4 grid grid-cols-2 gap-3 text-center text-sm">
-                <div>
-                  <p className="text-gray-300">Global Win Rate</p>
-                  <p className="font-bold text-white">{globalStats.winRate}%</p>
-                </div>
-                <div>
-                  <p className="text-gray-300">Your Win Rate</p>
-                  <p className="font-bold text-white">{winRate}%</p>
-                </div>
-                <div>
-                  <p className="text-gray-300">Global Avg Guess #</p>
-                  <p className="font-bold text-white">{globalStats.avgGuesses.toFixed(1)}</p>
-                </div>
-                <div>
-                  <p className="text-gray-300">Your Avg Guess #</p>
-                  <p className="font-bold text-white">{userAvgGuesses.toFixed(1)}</p>
-                </div>
+            <div className="mt-4 grid grid-cols-3 gap-3 text-center text-sm">
+              <div>
+                <p className="text-gray-300">Win Rate</p>
+                <p className="font-bold text-white">{winRate}%</p>
               </div>
-            )}
+              <div>
+                <p className="text-gray-300">Avg Guess #</p>
+                <p className="font-bold text-white">{userAvgGuesses > 0 ? userAvgGuesses.toFixed(1) : '-'}</p>
+              </div>
+              <div>
+                <p className="text-gray-300">Avg Guess Time</p>
+                <p className="font-bold text-white">{avgGuessTime > 0 ? `${avgGuessTime.toFixed(1)}s` : '-'}</p>
+              </div>
+            </div>
           </div>
         )}
 

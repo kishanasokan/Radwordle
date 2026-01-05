@@ -15,6 +15,8 @@ export interface Statistics {
   maxStreak: number;
   guessDistribution: { [key: number]: number };
   lastPlayedDay?: number;
+  totalGuessTime?: number; // Total time spent on guesses in seconds
+  totalGuessCount?: number; // Total number of guesses made
 }
 
 export interface ArchiveStatistics {
@@ -201,6 +203,21 @@ export function updateStatistics(won: boolean, guessCount: number, dayNumber: nu
   }
 
   saveStatistics(stats);
+}
+
+export function updateGuessTimeStatistics(guessTimeSeconds: number): void {
+  const stats = getStatistics();
+
+  stats.totalGuessTime = (stats.totalGuessTime || 0) + guessTimeSeconds;
+  stats.totalGuessCount = (stats.totalGuessCount || 0) + 1;
+
+  saveStatistics(stats);
+}
+
+export function getAvgGuessTime(): number {
+  const stats = getStatistics();
+  if (!stats.totalGuessCount || stats.totalGuessCount === 0) return 0;
+  return stats.totalGuessTime! / stats.totalGuessCount;
 }
 
 // Archive Statistics Management (separate from daily streaks)
