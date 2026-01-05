@@ -35,6 +35,7 @@ export const metadata: Metadata = {
   description: "A radiology word guessing game",
   icons: {
     icon: "/radle_icon.svg",
+    apple: "/apple-touch-icon.png",
   },
 };
 
