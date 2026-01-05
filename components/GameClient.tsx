@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Condition, getGlobalStats, calculatePercentileBeat, GlobalStats } from '@/lib/supabase';
+import { Condition, getGlobalStats, calculatePercentileBeat, GlobalStats, checkIsFastestSolver } from '@/lib/supabase';
 import DiagnosisAutocomplete from './DiagnosisAutocomplete';
 import { checkAnswer } from '@/lib/gameLogic';
 import { MAX_GUESSES } from '@/lib/gameLogic';
@@ -53,8 +53,22 @@ export default function GameClient({
       setGameState(savedState);
       onGameStateChange(savedState);
 
+      // Restore saved solve time and first solver status
+      if (savedState.solveTimeSeconds !== undefined) {
+        setSolveTimeSeconds(savedState.solveTimeSeconds);
+      }
+      if (savedState.isFirstSolver) {
+        setIsFirstSolver(true);
+      }
+
       // Show modal if game is already complete
       if (savedState.isComplete) {
+        // If there's a game result ID, check if user still holds fastest solver status
+        if (savedState.gameResultId) {
+          checkIsFastestSolver(savedState.gameResultId).then((stillFastest) => {
+            setIsFastestSolver(stillFastest);
+          });
+        }
         setShowModal(true);
       }
     } else {
@@ -114,9 +128,18 @@ export default function GameClient({
           guesses: newGuesses,
           player_hash: getPlayerHash(),
           solve_time_seconds: totalSolveTime,
-        }).then((result) => {
-          setIsFirstSolver(result.isFirstSolver);
-          setIsFastestSolver(result.isFastestSolver);
+        }).then((submitResult) => {
+          setIsFirstSolver(submitResult.isFirstSolver);
+          setIsFastestSolver(submitResult.isFastestSolver);
+          // Save the game result ID and status to localStorage for future checks
+          const updatedState: GameState = {
+            ...newState,
+            gameResultId: submitResult.gameResultId,
+            isFirstSolver: submitResult.isFirstSolver,
+            solveTimeSeconds: totalSolveTime,
+          };
+          saveGameState(updatedState);
+          setGameState(updatedState);
         });
         setShowModal(true);
       } else if (newGuesses.length >= MAX_GUESSES) {

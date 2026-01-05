@@ -6,6 +6,9 @@ export interface GameState {
   isComplete: boolean;
   isWon: boolean;
   hasPartialMatch: boolean;
+  gameResultId?: string | null;
+  isFirstSolver?: boolean;
+  solveTimeSeconds?: number | null;
 }
 
 export interface Statistics {
