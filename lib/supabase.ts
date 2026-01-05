@@ -320,15 +320,12 @@ export interface GameResultInput {
 
 export interface GameResultOutput {
   isFirstSolver: boolean;
-  isFastestSolver: boolean;
-  gameResultId: string | null;
 }
 
 /**
  * Submits a game result to the database.
  * Called when a game ends (win or loss).
- * Returns whether this is the first person to solve this puzzle and/or the fastest.
- * The fastest solver status is stored in the DB and only one person holds it at a time.
+ * Returns whether this is the first person to solve this puzzle.
  */
 export async function submitGameResult(result: GameResultInput): Promise<GameResultOutput> {
   // Check if anyone has already solved this puzzle (won = true)
@@ -340,46 +337,8 @@ export async function submitGameResult(result: GameResultInput): Promise<GameRes
 
   const isFirstSolver = result.won && !countError && count === 0;
 
-  // Check if this is the fastest solver for today's puzzle
-  let isFastestSolver = false;
-  let previousFastestId: string | null = null;
-
-  if (result.won && result.solve_time_seconds !== undefined) {
-    // Get the current fastest result for this puzzle
-    const { data: fastestResult, error: fastestError } = await supabase
-      .from('game_results')
-      .select('id, solve_time_seconds')
-      .eq('puzzle_number', result.puzzle_number)
-      .eq('won', true)
-      .not('solve_time_seconds', 'is', null)
-      .order('solve_time_seconds', { ascending: true })
-      .limit(1)
-      .single();
-
-    // If no previous results or this time is faster, they're the fastest
-    if (fastestError?.code === 'PGRST116' || !fastestResult) {
-      // No previous results with solve time
-      isFastestSolver = true;
-    } else if (fastestResult && result.solve_time_seconds < fastestResult.solve_time_seconds) {
-      isFastestSolver = true;
-      previousFastestId = fastestResult.id;
-    }
-  }
-
-  // If this player is now the fastest, revoke the status from the previous holder
-  if (isFastestSolver && previousFastestId) {
-    const { error: updateError } = await supabase
-      .from('game_results')
-      .update({ is_fastest_solver: false })
-      .eq('id', previousFastestId);
-
-    if (updateError) {
-      console.error('Error revoking previous fastest solver status:', updateError);
-    }
-  }
-
   // Insert the new game result
-  const { data: insertedResult, error } = await supabase
+  const { error } = await supabase
     .from('game_results')
     .insert({
       puzzle_number: result.puzzle_number,
@@ -389,11 +348,8 @@ export async function submitGameResult(result: GameResultInput): Promise<GameRes
       guesses: result.guesses,
       player_hash: result.player_hash,
       is_first_solver: isFirstSolver,
-      is_fastest_solver: isFastestSolver,
       solve_time_seconds: result.solve_time_seconds,
-    })
-    .select('id')
-    .single();
+    });
 
   if (error) {
     console.error('Error submitting game result:', error);
@@ -402,28 +358,7 @@ export async function submitGameResult(result: GameResultInput): Promise<GameRes
 
   return {
     isFirstSolver,
-    isFastestSolver,
-    gameResultId: insertedResult?.id || null,
   };
-}
-
-/**
- * Checks if a specific game result still holds the fastest solver status.
- * Used when re-opening the results modal to verify the award is still valid.
- */
-export async function checkIsFastestSolver(gameResultId: string): Promise<boolean> {
-  const { data, error } = await supabase
-    .from('game_results')
-    .select('is_fastest_solver')
-    .eq('id', gameResultId)
-    .single();
-
-  if (error) {
-    console.error('Error checking fastest solver status:', error);
-    return false;
-  }
-
-  return data?.is_fastest_solver === true;
 }
 
 export interface GlobalStats {

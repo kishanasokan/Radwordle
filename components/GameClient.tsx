@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Condition, getGlobalStats, calculatePercentileBeat, GlobalStats, checkIsFastestSolver } from '@/lib/supabase';
+import { Condition, getGlobalStats, calculatePercentileBeat, GlobalStats } from '@/lib/supabase';
 import DiagnosisAutocomplete from './DiagnosisAutocomplete';
 import { checkAnswer } from '@/lib/gameLogic';
 import { MAX_GUESSES } from '@/lib/gameLogic';
@@ -40,8 +40,6 @@ export default function GameClient({
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isFirstSolver, setIsFirstSolver] = useState(false);
-  const [isFastestSolver, setIsFastestSolver] = useState(false);
-  const [solveTimeSeconds, setSolveTimeSeconds] = useState<number | null>(null);
   const guessStartTime = useRef<number>(Date.now());
   const gameStartTime = useRef<number>(Date.now());
 
@@ -53,22 +51,13 @@ export default function GameClient({
       setGameState(savedState);
       onGameStateChange(savedState);
 
-      // Restore saved solve time and first solver status
-      if (savedState.solveTimeSeconds !== undefined) {
-        setSolveTimeSeconds(savedState.solveTimeSeconds);
-      }
+      // Restore first solver status
       if (savedState.isFirstSolver) {
         setIsFirstSolver(true);
       }
 
       // Show modal if game is already complete
       if (savedState.isComplete) {
-        // If there's a game result ID, check if user still holds fastest solver status
-        if (savedState.gameResultId) {
-          checkIsFastestSolver(savedState.gameResultId).then((stillFastest) => {
-            setIsFastestSolver(stillFastest);
-          });
-        }
         setShowModal(true);
       }
     } else {
@@ -119,7 +108,6 @@ export default function GameClient({
         }
         // Submit to global analytics
         const totalSolveTime = (Date.now() - gameStartTime.current) / 1000;
-        setSolveTimeSeconds(totalSolveTime);
         submitGameResult({
           puzzle_number: puzzleNumber,
           won: true,
@@ -130,13 +118,10 @@ export default function GameClient({
           solve_time_seconds: totalSolveTime,
         }).then((submitResult) => {
           setIsFirstSolver(submitResult.isFirstSolver);
-          setIsFastestSolver(submitResult.isFastestSolver);
-          // Save the game result ID and status to localStorage for future checks
+          // Save the first solver status to localStorage
           const updatedState: GameState = {
             ...newState,
-            gameResultId: submitResult.gameResultId,
             isFirstSolver: submitResult.isFirstSolver,
-            solveTimeSeconds: totalSolveTime,
           };
           saveGameState(updatedState);
           setGameState(updatedState);
@@ -292,8 +277,6 @@ export default function GameClient({
           dayNumber={dayNumber}
           isArchive={isArchive}
           isFirstSolver={isFirstSolver}
-          isFastestSolver={isFastestSolver}
-          solveTimeSeconds={solveTimeSeconds}
           onClose={handleCloseModal}
         />
       )}
@@ -309,8 +292,6 @@ interface ResultsModalProps {
   dayNumber: number;
   isArchive: boolean;
   isFirstSolver: boolean;
-  isFastestSolver: boolean;
-  solveTimeSeconds: number | null;
   onClose: () => void;
 }
 
@@ -322,8 +303,6 @@ function ResultsModal({
   dayNumber,
   isArchive,
   isFirstSolver,
-  isFastestSolver,
-  solveTimeSeconds,
   onClose,
 }: ResultsModalProps) {
   const stats = getStatistics();
@@ -419,15 +398,6 @@ function ResultsModal({
           </div>
         )}
 
-        {isFastestSolver && !isFirstSolver && (
-          <div className="bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg px-4 py-3 mb-4 text-center">
-            <p className="text-xl font-bold text-white">⏱️ Fastest Solver!</p>
-            <p className="text-sm text-white/80">
-              You set the fastest time for Day {dayNumber + 1}
-              {solveTimeSeconds !== null && ` in ${solveTimeSeconds.toFixed(1)}s`}!
-            </p>
-          </div>
-        )}
 
         <div className="text-white text-center mb-6">
           {isWon ? (
