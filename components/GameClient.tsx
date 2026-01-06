@@ -39,7 +39,6 @@ export default function GameClient({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [isFirstSolver, setIsFirstSolver] = useState(false);
   const guessStartTime = useRef<number>(Date.now());
   const gameStartTime = useRef<number>(Date.now());
 
@@ -50,11 +49,6 @@ export default function GameClient({
     if (savedState) {
       setGameState(savedState);
       onGameStateChange(savedState);
-
-      // Restore first solver status
-      if (savedState.isFirstSolver) {
-        setIsFirstSolver(true);
-      }
 
       // Show modal if game is already complete
       if (savedState.isComplete) {
@@ -117,8 +111,7 @@ export default function GameClient({
           player_hash: getPlayerHash(),
           solve_time_seconds: totalSolveTime,
         }).then((submitResult) => {
-          setIsFirstSolver(submitResult.isFirstSolver);
-          // Save the first solver status to localStorage
+          // Save the first solver status to localStorage (data still tracked, UI hidden)
           const updatedState: GameState = {
             ...newState,
             isFirstSolver: submitResult.isFirstSolver,
@@ -276,7 +269,6 @@ export default function GameClient({
           correctAnswer={correctAnswer}
           dayNumber={dayNumber}
           isArchive={isArchive}
-          isFirstSolver={isFirstSolver}
           onClose={handleCloseModal}
         />
       )}
@@ -291,7 +283,6 @@ interface ResultsModalProps {
   correctAnswer: string;
   dayNumber: number;
   isArchive: boolean;
-  isFirstSolver: boolean;
   onClose: () => void;
 }
 
@@ -302,7 +293,6 @@ function ResultsModal({
   correctAnswer,
   dayNumber,
   isArchive,
-  isFirstSolver,
   onClose,
 }: ResultsModalProps) {
   const stats = getStatistics();
@@ -391,12 +381,7 @@ function ResultsModal({
           {isWon ? '🎉 Congratulations!' : '😔 Game Over'}
         </h2>
 
-        {isFirstSolver && (
-          <div className="bg-gradient-to-r from-yellow-500 to-amber-500 rounded-lg px-4 py-3 mb-4 text-center">
-            <p className="text-xl font-bold text-black">🏆 First Solver!</p>
-            <p className="text-sm text-black/80">You&apos;re the first person to solve Day {dayNumber + 1}!</p>
-          </div>
-        )}
+{/* First solver banner - hidden for now but data still tracked */}
 
 
         <div className="text-white text-center mb-6">
