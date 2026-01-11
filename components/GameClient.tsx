@@ -17,6 +17,16 @@ import {
 } from '@/lib/localStorage';
 import { submitGameResult } from '@/lib/supabase';
 
+// Toast feedback types
+type ToastType = 'correct' | 'partial' | 'incorrect' | null;
+
+interface ToastConfig {
+  message: string;
+  bgColor: string;
+  textColor: string;
+  icon: string;
+}
+
 interface GameClientProps {
   conditions: Condition[];
   dayNumber: number;
@@ -26,6 +36,28 @@ interface GameClientProps {
   onGameStateChange: (state: GameState) => void;
   onTypingStateChange?: (isTyping: boolean) => void;
 }
+
+// Toast configuration for different result types
+const TOAST_CONFIG: Record<Exclude<ToastType, null>, ToastConfig> = {
+  correct: {
+    message: 'Correct!',
+    bgColor: 'bg-green-500',
+    textColor: 'text-white',
+    icon: '✓',
+  },
+  partial: {
+    message: "Close! You're on the right track",
+    bgColor: 'bg-yellow-500',
+    textColor: 'text-black',
+    icon: '◐',
+  },
+  incorrect: {
+    message: 'Not quite - try again',
+    bgColor: 'bg-red-500',
+    textColor: 'text-white',
+    icon: '✗',
+  },
+};
 
 export default function GameClient({
   conditions,
@@ -39,8 +71,35 @@ export default function GameClient({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [toast, setToast] = useState<ToastType>(null);
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const guessStartTime = useRef<number>(Date.now());
   const gameStartTime = useRef<number>(Date.now());
+
+  // Clear toast timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Show toast notification
+  const showToast = useCallback((type: ToastType) => {
+    // Clear any existing timeout
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+
+    setToast(type);
+
+    // Auto-dismiss after 2 seconds (longer for correct to let celebration sink in)
+    const duration = type === 'correct' ? 2500 : 2000;
+    toastTimeoutRef.current = setTimeout(() => {
+      setToast(null);
+    }, duration);
+  }, []);
 
   // Initialize game state from localStorage
   useEffect(() => {
@@ -83,6 +142,9 @@ export default function GameClient({
       const result = checkAnswer(diagnosis, correctAnswer);
       const newGuesses = [...gameState.guesses, diagnosis];
       const newGuessResults = [...gameState.guessResults, result];
+
+      // Show toast feedback for the guess result
+      showToast(result);
 
       let newState: GameState;
 
@@ -160,7 +222,7 @@ export default function GameClient({
       saveGameState(newState);
       onGameStateChange(newState);
     },
-    [gameState, correctAnswer, onGameStateChange, isArchive, dayNumber, puzzleNumber]
+    [gameState, correctAnswer, onGameStateChange, isArchive, dayNumber, puzzleNumber, showToast]
   );
 
   const handleDropdownStateChange = useCallback((isOpen: boolean) => {
@@ -176,6 +238,21 @@ export default function GameClient({
 
   return (
     <>
+      {/* Toast notification for guess feedback */}
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`fixed top-20 left-1/2 z-50 px-6 py-3 rounded-lg shadow-lg
+            ${TOAST_CONFIG[toast].bgColor} ${TOAST_CONFIG[toast].textColor}
+            animate-toast-in
+            font-baloo-2 font-semibold text-lg flex items-center gap-2`}
+        >
+          <span className="text-xl">{TOAST_CONFIG[toast].icon}</span>
+          {TOAST_CONFIG[toast].message}
+        </div>
+      )}
+
       {/* Desktop layout - normal flow */}
       <div className={`hidden sm:block w-full transition-all duration-300 ${isDropdownOpen ? 'pb-[200px]' : ''}`}>
         {gameState.isComplete ? (
