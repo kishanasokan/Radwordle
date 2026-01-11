@@ -63,13 +63,94 @@ function getSignificantWords(diagnosis: string): string[] {
   // Filter out common medical terms that shouldn't count for partial matches
   const commonTerms = new Set([
     'of', 'the', 'a', 'an', 'with', 'without', 'and', 'or',
-    'disease', 'syndrome', 'disorder', 'condition', 'injury'
+    'disease', 'syndrome', 'disorder', 'condition', 'injury',
+    'acute', 'chronic',
+    'left', 'right', 'bilateral',
+    'type', 'stage', 'grade',
+    'primary', 'secondary',
+    'benign', 'malignant',
+    'congenital', 'acquired',
+    'early', 'late', 'advanced',
+    'mild', 'moderate', 'severe',
+    'upper', 'lower',
+    'small', 'large'
   ]);
 
   return words.filter(word => word.length > 0 && !commonTerms.has(word));
 }
 
 const MIN_PREFIX_LENGTH = 5;
+
+// Groups of anatomically related/synonymous terms
+const anatomicalSynonyms: string[][] = [
+  ['liver', 'hepatic', 'hepato'],
+  ['kidney', 'renal', 'nephro'],
+  ['lung', 'pulmonary', 'pneumo'],
+  ['heart', 'cardiac', 'coronary', 'myocardial'],
+  ['brain', 'cerebral', 'intracranial', 'neuro'],
+  ['bone', 'osseous', 'skeletal', 'osteo'],
+  ['stomach', 'gastric', 'gastro'],
+  ['intestine', 'bowel', 'enteric', 'intestinal'],
+  ['colon', 'colonic', 'colorectal'],
+  ['spine', 'spinal', 'vertebral'],
+  ['blood', 'hematologic', 'vascular', 'hemorrhagic'],
+  ['chest', 'thoracic', 'thorax'],
+  ['abdomen', 'abdominal'],
+  ['pelvis', 'pelvic'],
+  ['neck', 'cervical'],
+  ['head', 'cranial', 'cephalic'],
+  ['skin', 'dermal', 'cutaneous'],
+  ['muscle', 'muscular', 'myopathy'],
+  ['nerve', 'neural', 'neurologic'],
+  ['vessel', 'vascular', 'arterial', 'venous'],
+  ['pancreas', 'pancreatic'],
+  ['spleen', 'splenic'],
+  ['gallbladder', 'biliary', 'cholecyst'],
+  ['thyroid', 'thyroidal'],
+  ['adrenal', 'adrenal'],
+  ['esophagus', 'esophageal'],
+  ['trachea', 'tracheal'],
+  ['bladder', 'vesical', 'cystic'],
+  ['uterus', 'uterine', 'endometrial'],
+  ['ovary', 'ovarian'],
+  ['prostate', 'prostatic'],
+  ['breast', 'mammary'],
+  ['lymph', 'lymphatic', 'lymphoid'],
+  ['joint', 'articular', 'arthro'],
+  ['tendon', 'tendinous'],
+  ['cartilage', 'chondral'],
+  ['eye', 'ocular', 'optic', 'ophthalmic'],
+  ['ear', 'otic', 'aural'],
+];
+
+// Build a map from each term to its synonym group index for O(1) lookup
+const synonymMap = new Map<string, number>();
+anatomicalSynonyms.forEach((group, index) => {
+  group.forEach(term => synonymMap.set(term.toLowerCase(), index));
+});
+
+/**
+ * Checks if two words are anatomical synonyms
+ */
+function areAnatomicalSynonyms(word1: string, word2: string): boolean {
+  const group1 = synonymMap.get(word1.toLowerCase());
+  const group2 = synonymMap.get(word2.toLowerCase());
+  return group1 !== undefined && group1 === group2;
+}
+
+/**
+ * Checks if any word from the guess is an anatomical synonym of any word from the answer
+ */
+function hasAnatomicalSynonymMatch(guessWords: string[], answerWords: string[]): boolean {
+  for (const guessWord of guessWords) {
+    for (const answerWord of answerWords) {
+      if (areAnatomicalSynonyms(guessWord, answerWord)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 /**
  * Checks if two words share a common prefix of at least MIN_PREFIX_LENGTH characters.
@@ -123,6 +204,11 @@ export function checkAnswer(guess: string, correctAnswer: string): 'correct' | '
 
   // Check for prefix match (e.g., "esophagus" matches "esophageal")
   if (hasPrefixMatch(guessWords, answerWords)) {
+    return 'partial';
+  }
+
+  // Check for anatomical synonym match (e.g., "liver" matches "hepatic")
+  if (hasAnatomicalSynonymMatch(guessWords, answerWords)) {
     return 'partial';
   }
 
