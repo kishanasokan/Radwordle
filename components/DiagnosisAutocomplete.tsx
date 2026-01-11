@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Condition } from '@/lib/supabase';
 
 interface DiagnosisAutocompleteProps {
@@ -21,9 +21,22 @@ export default function DiagnosisAutocomplete({
   const [inputValue, setInputValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Create a Map of normalized condition names to original names for O(1) lookup
+  const conditionNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    conditions.forEach(c => map.set(c.name.toLowerCase().trim(), c.name));
+    return map;
+  }, [conditions]);
+
+  // Get the exact condition name with proper casing (returns null if not found)
+  const getExactConditionName = useCallback((value: string): string | null => {
+    return conditionNameMap.get(value.toLowerCase().trim()) ?? null;
+  }, [conditionNameMap]);
 
   // Efficient search with memoization
   const filteredConditions = useMemo(() => {
@@ -48,6 +61,10 @@ export default function DiagnosisAutocomplete({
     setInputValue(value);
     setIsOpen(value.trim().length > 0);
     setSelectedIndex(-1);
+    // Clear validation error when user starts typing
+    if (validationError) {
+      setValidationError(null);
+    }
   };
 
   // Check if a condition was previously guessed (case-insensitive)
@@ -165,82 +182,134 @@ export default function DiagnosisAutocomplete({
   }, []);
 
   const handleSubmit = () => {
-    if (inputValue.trim()) {
-      onSubmit(inputValue.trim());
-      setInputValue('');
-      setIsOpen(false);
+    const trimmedValue = inputValue.trim();
+
+    if (!trimmedValue) {
+      return;
     }
+
+    // Check if the input matches a valid condition from the list
+    const exactConditionName = getExactConditionName(trimmedValue);
+
+    if (!exactConditionName) {
+      // Input doesn't match any valid condition
+      setValidationError('Please select a diagnosis from the list');
+      return;
+    }
+
+    // Check if already guessed
+    if (isPreviouslyGuessed(exactConditionName)) {
+      setValidationError('You have already guessed this diagnosis');
+      return;
+    }
+
+    // Valid submission - use the exact condition name for consistency
+    onSubmit(exactConditionName);
+    setInputValue('');
+    setIsOpen(false);
+    setValidationError(null);
   };
 
   return (
-    <div ref={containerRef} className="w-full max-w-xl mx-auto flex gap-2 sm:gap-3 relative z-50">
-      <div className="flex-1 relative">
-        <input
-          ref={inputRef}
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          placeholder="Diagnosis..."
-          className="w-full px-3 sm:px-6 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-baloo-2 bg-white bg-opacity-90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-          autoComplete="off"
-        />
-
-        {/* Dropdown menu - appears above on mobile, below on desktop */}
-        {isOpen && filteredConditions.length > 0 && (
-          <div
-            className={`absolute left-0 right-0 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 overflow-hidden ${
-              isMobile ? 'bottom-full mb-2' : 'top-full mt-2'
+    <div ref={containerRef} className="w-full max-w-xl mx-auto relative z-50">
+      <div className="flex gap-2 sm:gap-3">
+        <div className="flex-1 relative">
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Diagnosis..."
+            aria-invalid={!!validationError}
+            aria-describedby={validationError ? "diagnosis-error" : undefined}
+            className={`w-full px-3 sm:px-6 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-baloo-2 bg-white bg-opacity-90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 ${
+              validationError
+                ? 'ring-2 ring-red-500 focus:ring-red-500'
+                : 'focus:ring-yellow-400'
             }`}
-          >
+            autoComplete="off"
+          />
+
+          {/* Dropdown menu - appears above on mobile, below on desktop */}
+          {isOpen && filteredConditions.length > 0 && (
             <div
-              ref={dropdownRef}
-              className="overflow-y-auto"
-              style={{ maxHeight: '180px' }}
+              className={`absolute left-0 right-0 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 overflow-hidden ${
+                isMobile ? 'bottom-full mb-2' : 'top-full mt-2'
+              }`}
             >
-              {filteredConditions.map((condition, index) => {
-                const isDisabled = isPreviouslyGuessed(condition.name);
+              <div
+                ref={dropdownRef}
+                className="overflow-y-auto"
+                style={{ maxHeight: '180px' }}
+              >
+                {filteredConditions.map((condition, index) => {
+                  const isDisabled = isPreviouslyGuessed(condition.name);
 
-                return (
-                  <button
-                    key={condition.id}
-                    onClick={() => handleSelectOption(condition.name)}
-                    disabled={isDisabled}
-                    className={`w-full text-left px-6 py-3 transition-colors border-b border-gray-100 last:border-b-0 ${
-                      isDisabled
-                        ? 'cursor-not-allowed bg-gray-50'
-                        : 'hover:bg-blue-50'
-                    } ${
-                      index === selectedIndex && !isDisabled ? 'bg-blue-100' : ''
-                    }`}
-                  >
-                    <div className={`font-medium ${isDisabled ? 'text-gray-400' : 'text-gray-800'}`}>
-                      {condition.name}
-                      {isDisabled && (
-                        <span className="ml-2 text-xs">(Previously selected)</span>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Result count indicator */}
-            {filteredConditions.length === 40 && (
-              <div className="px-6 py-2 bg-gray-50 text-xs text-gray-500 text-center border-t border-gray-200">
-                Showing first 40 results. Type more to narrow down.
+                  return (
+                    <button
+                      key={condition.id}
+                      onClick={() => handleSelectOption(condition.name)}
+                      disabled={isDisabled}
+                      className={`w-full text-left px-6 py-3 transition-colors border-b border-gray-100 last:border-b-0 ${
+                        isDisabled
+                          ? 'cursor-not-allowed bg-gray-50'
+                          : 'hover:bg-blue-50'
+                      } ${
+                        index === selectedIndex && !isDisabled ? 'bg-blue-100' : ''
+                      }`}
+                    >
+                      <div className={`font-medium ${isDisabled ? 'text-gray-400' : 'text-gray-800'}`}>
+                        {condition.name}
+                        {isDisabled && (
+                          <span className="ml-2 text-xs">(Previously selected)</span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
-            )}
-          </div>
-        )}
+
+              {/* Result count indicator */}
+              {filteredConditions.length === 40 && (
+                <div className="px-6 py-2 bg-gray-50 text-xs text-gray-500 text-center border-t border-gray-200">
+                  Showing first 40 results. Type more to narrow down.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={handleSubmit}
+          className="px-4 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] hover:from-[#f59e0b] hover:to-[#f59e0b] text-black font-bold font-baloo-2 text-base sm:text-lg rounded-lg transition-all shadow-lg"
+        >
+          Submit
+        </button>
       </div>
 
-      <button
-        onClick={handleSubmit}
-        className="px-4 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] hover:from-[#f59e0b] hover:to-[#f59e0b] text-black font-bold font-baloo-2 text-base sm:text-lg rounded-lg transition-all shadow-lg"
-      >
-        Submit
-      </button>
+      {/* Validation error message */}
+      {validationError && (
+        <div
+          id="diagnosis-error"
+          role="alert"
+          className="mt-2 px-3 py-2 bg-red-100 border border-red-300 rounded-lg text-red-700 text-sm font-medium flex items-center gap-2"
+        >
+          <svg
+            className="w-4 h-4 flex-shrink-0"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            aria-hidden="true"
+          >
+            <path
+              fillRule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+              clipRule="evenodd"
+            />
+          </svg>
+          {validationError}
+        </div>
+      )}
     </div>
   );
 }
