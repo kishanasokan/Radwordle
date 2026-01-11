@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Puzzle, Hint, Condition } from '@/lib/supabase';
 import GameClient from './GameClient';
 import StatsModal from './StatsModal';
+import FeedbackModal from './FeedbackModal';
 import { GameState, getStatistics, Statistics } from '@/lib/localStorage';
 
 interface GamePageProps {
@@ -19,6 +20,7 @@ interface GamePageProps {
 export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchive }: GamePageProps) {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [showStats, setShowStats] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const [stats, setStats] = useState<Statistics>({
     gamesPlayed: 0,
     gamesWon: 0,
@@ -120,14 +122,24 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
               </h1>
             </div>
 
-            {/* Stats Button */}
-            <button
-              onClick={() => setShowStats(true)}
-              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
-            >
-              <span className="text-base sm:text-xl">📊</span>
-              <span className="font-bold font-baloo-2 text-xs sm:text-base">Stats</span>
-            </button>
+            {/* Stats and Feedback Buttons */}
+            <div className="flex items-center gap-1 sm:gap-2">
+              <button
+                onClick={() => setShowFeedback(true)}
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
+                title="Send Feedback"
+              >
+                <span className="text-base sm:text-xl">💬</span>
+                <span className="hidden sm:inline font-bold font-baloo-2 text-xs sm:text-base">Feedback</span>
+              </button>
+              <button
+                onClick={() => setShowStats(true)}
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
+              >
+                <span className="text-base sm:text-xl">📊</span>
+                <span className="font-bold font-baloo-2 text-xs sm:text-base">Stats</span>
+              </button>
+            </div>
           </div>
 
           {/* Logo and Title - Second row on mobile only */}
@@ -252,6 +264,13 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
         isOpen={showStats}
         onClose={() => setShowStats(false)}
         stats={stats}
+      />
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        isOpen={showFeedback}
+        onClose={() => setShowFeedback(false)}
+        pageContext={isArchive ? `archive/day-${dayNumber}` : `day-${dayNumber}`}
       />
     </div>
   );
