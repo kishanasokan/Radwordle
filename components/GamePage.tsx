@@ -195,6 +195,9 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
                 // To color the hint based on the NEXT guess after it was revealed, we look at index + 1.
                 // If there's no next guess yet, the hint stays blue.
                 const nextGuessResult = gameState?.guessResults[index + 1];
+                // The guess that revealed this hint is at the same index
+                const guessThatRevealedHint = gameState?.guesses[index];
+                const guessResult = gameState?.guessResults[index];
 
                 // Determine the color and text color based on the next guess result
                 let hintStyle = '';
@@ -229,6 +232,15 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
                       <p className="text-lg">{hint.image_caption}</p>
                     ) : (
                       <p className="text-lg opacity-50">Hint {index + 1}</p>
+                    )}
+                    {/* Show the guess that revealed this hint */}
+                    {guessThatRevealedHint && (
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="text-sm opacity-60">✗</span>
+                        <span className="text-sm opacity-60">
+                          {guessThatRevealedHint}
+                        </span>
+                      </div>
                     )}
                   </div>
                 );
