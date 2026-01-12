@@ -282,6 +282,27 @@ export default function GameClient({
                 Guesses: {gameState.guesses.length} / {MAX_GUESSES}
               </p>
             </div>
+            {/* Show all guesses */}
+            {gameState.guesses.length > 0 && (
+              <div className="mb-4 flex flex-col items-center gap-2">
+                {gameState.guesses.map((guess, index) => {
+                  const result = gameState.guessResults[index];
+                  let symbol = '✗'; // Default to incorrect
+                  
+                  if (result === 'correct') {
+                    symbol = '✓';
+                  } else if (result === 'partial') {
+                    symbol = '◐';
+                  }
+                  
+                  return (
+                    <div key={index} className="flex items-center gap-2">
+                      <span className="text-sm opacity-60 text-white">{symbol} {guess}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             <DiagnosisAutocomplete
               conditions={conditions}
               onSubmit={handleSubmit}
@@ -322,6 +343,27 @@ export default function GameClient({
                 Guesses: {gameState.guesses.length} / {MAX_GUESSES}
               </p>
             </div>
+            {/* Show all guesses */}
+            {gameState.guesses.length > 0 && (
+              <div className="mb-4 flex flex-col items-center gap-2">
+                {gameState.guesses.map((guess, index) => {
+                  const result = gameState.guessResults[index];
+                  let symbol = '✗'; // Default to incorrect
+                  
+                  if (result === 'correct') {
+                    symbol = '✓';
+                  } else if (result === 'partial') {
+                    symbol = '◐';
+                  }
+                  
+                  return (
+                    <div key={index} className="flex items-center gap-2">
+                      <span className="text-sm opacity-60 text-white">{symbol} {guess}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             {/* Input sticky at bottom on mobile - positions directly above keyboard */}
             <div className="fixed bottom-0 left-0 right-0 px-4 pb-[env(safe-area-inset-bottom,0px)] bg-gradient-to-t from-[#0f1c2e] via-[#0f1c2e]/80 to-transparent pt-4 z-40">
               <DiagnosisAutocomplete
