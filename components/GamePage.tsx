@@ -180,6 +180,15 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
                 </div>
               )}
             </div>
+            {/* Show first guess underneath the photo */}
+            {gameState && gameState.guesses.length > 0 && (
+              <div className="mt-3 flex items-center justify-center gap-2">
+                <span className="text-sm opacity-60 text-white">✗</span>
+                <span className="text-sm opacity-60 text-white">
+                  {gameState.guesses[0]}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Question */}
@@ -195,9 +204,9 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
                 // To color the hint based on the NEXT guess after it was revealed, we look at index + 1.
                 // If there's no next guess yet, the hint stays blue.
                 const nextGuessResult = gameState?.guessResults[index + 1];
-                // The guess that revealed this hint is at the same index
-                const guessThatRevealedHint = gameState?.guesses[index];
-                const guessResult = gameState?.guessResults[index];
+                // The guess made AFTER this hint was revealed (which should be shown with this hint)
+                // Hint 0 is revealed after guess 0, so the guess shown with hint 0 is guess 1 (index + 1)
+                const guessAfterHint = gameState?.guesses[index + 1];
 
                 // Determine the color and text color based on the next guess result
                 let hintStyle = '';
@@ -233,12 +242,12 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
                     ) : (
                       <p className="text-lg opacity-50">Hint {index + 1}</p>
                     )}
-                    {/* Show the guess that revealed this hint */}
-                    {guessThatRevealedHint && (
+                    {/* Show the guess made after this hint was revealed */}
+                    {guessAfterHint && (
                       <div className="mt-2 flex items-center gap-2">
                         <span className="text-sm opacity-60">✗</span>
                         <span className="text-sm opacity-60">
-                          {guessThatRevealedHint}
+                          {guessAfterHint}
                         </span>
                       </div>
                     )}
