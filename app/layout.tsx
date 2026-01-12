@@ -106,6 +106,95 @@ export const viewport = {
   interactiveWidget: "resizes-content",
 };
 
+// JSON-LD Structured Data
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": "https://radiordle.org/#application",
+      "name": "Radiordle",
+      "url": "https://radiordle.org",
+      "description": "A daily radiology puzzle game where players guess diagnoses from medical imaging cases. Educational and entertaining for medical students, radiology residents, and healthcare professionals.",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires JavaScript. Requires HTML5.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Organization",
+        "@id": "https://radiordle.org/#organization"
+      },
+      "screenshot": "https://radiordle.org/og-image.png"
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://radiordle.org/#organization",
+      "name": "Radiordle",
+      "url": "https://radiordle.org",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://radiordle.org/radle_icon.svg"
+      },
+      "sameAs": [
+        "https://github.com/kganiga/radiordle"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://radiordle.org/#website",
+      "url": "https://radiordle.org",
+      "name": "Radiordle",
+      "description": "Daily Radiology Puzzle Game",
+      "publisher": {
+        "@type": "Organization",
+        "@id": "https://radiordle.org/#organization"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://radiordle.org/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Radiordle?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Radiordle is a daily radiology puzzle game inspired by Wordle. Each day, players are presented with a medical imaging case and must guess the correct diagnosis within 5 attempts."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Who is Radiordle for?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Radiordle is designed for medical students learning radiology fundamentals, radiology residents preparing for board exams, healthcare professionals maintaining diagnostic skills, and anyone interested in medical imaging education."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I play Radiordle?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "View the medical image and make your best diagnosis guess. After each incorrect guess, a new hint is revealed. You have 5 attempts to guess the correct diagnosis. New puzzles are released daily at midnight EST."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Radiordle free to play?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, Radiordle is completely free to play. No registration or payment is required."
+          }
+        }
+      ]
+    }
+  ]
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -113,6 +202,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${fredoka.variable} ${baloo2.variable} ${poppins.variable} antialiased`}
         suppressHydrationWarning

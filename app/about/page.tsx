@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import LegalModals from '@/components/LegalModals';
 
 export const metadata: Metadata = {
   title: 'About - Radiordle',
@@ -159,6 +160,9 @@ export default function AboutPage() {
                 </p>
               </div>
             </section>
+
+            {/* Legal Buttons */}
+            <LegalModals />
 
           </div>
         </div>
