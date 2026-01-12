@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -178,6 +179,17 @@ export default function FeedbackModal({ isOpen, onClose, pageContext }: Feedback
               >
                 {status === 'submitting' ? 'Sending...' : 'Submit'}
               </button>
+            </div>
+
+            {/* About Link */}
+            <div className="mt-6 pt-4 border-t border-white/20 text-center">
+              <Link
+                href="/about"
+                className="text-blue-300 hover:text-blue-200 text-sm transition-colors"
+                onClick={handleClose}
+              >
+                Learn more about Radiordle
+              </Link>
             </div>
           </form>
         )}
