@@ -94,17 +94,19 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
       {/* Content */}
       <div className="relative z-10 min-h-screen sm:min-h-screen min-h-screen-safe flex flex-col">
         {/* Header with Logo and Buttons */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-3 sm:p-6 gap-0 sm:gap-0">
+        <div className="flex flex-col sm:flex-row sm:items-center p-3 sm:p-6 gap-0 sm:gap-0">
           {/* Top row on mobile: Archives and Stats buttons */}
           <div className="flex justify-between items-center sm:contents">
-            {/* Archives Button */}
-            <Link
-              href="/archive"
-              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
-            >
-              <span className="text-base sm:text-xl">📁</span>
-              <span className="font-bold font-baloo-2 text-xs sm:text-base">Archives</span>
-            </Link>
+            {/* Archives Button - Left side container with fixed width on desktop */}
+            <div className="sm:flex-1 sm:flex sm:justify-start">
+              <Link
+                href="/archive"
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
+              >
+                <span className="text-base sm:text-xl">📁</span>
+                <span className="font-bold font-baloo-2 text-xs sm:text-base">Archives</span>
+              </Link>
+            </div>
 
             {/* Logo and Title - Hidden on mobile, shown inline on larger screens */}
             <div className="hidden sm:flex items-center gap-1 drop-shadow-[0_6px_20px_rgba(0,0,0,0.6)]">
@@ -122,23 +124,25 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
               </h1>
             </div>
 
-            {/* Stats and Feedback Buttons */}
-            <div className="flex items-center gap-1 sm:gap-2">
-              <button
-                onClick={() => setShowFeedback(true)}
-                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
-                title="Send Feedback"
-              >
-                <span className="text-base sm:text-xl">💬</span>
-                <span className="hidden sm:inline font-bold font-baloo-2 text-xs sm:text-base">Feedback</span>
-              </button>
-              <button
-                onClick={() => setShowStats(true)}
-                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
-              >
-                <span className="text-base sm:text-xl">📊</span>
-                <span className="font-bold font-baloo-2 text-xs sm:text-base">Stats</span>
-              </button>
+            {/* Stats and Feedback Buttons - Right side container with fixed width on desktop */}
+            <div className="sm:flex-1 sm:flex sm:justify-end">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <button
+                  onClick={() => setShowFeedback(true)}
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
+                  title="Send Feedback"
+                >
+                  <span className="text-base sm:text-xl">💬</span>
+                  <span className="hidden sm:inline font-bold font-baloo-2 text-xs sm:text-base">Feedback</span>
+                </button>
+                <button
+                  onClick={() => setShowStats(true)}
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
+                >
+                  <span className="text-base sm:text-xl">📊</span>
+                  <span className="font-bold font-baloo-2 text-xs sm:text-base">Stats</span>
+                </button>
+              </div>
             </div>
           </div>
 
