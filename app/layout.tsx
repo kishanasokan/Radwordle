@@ -63,20 +63,11 @@ export const metadata: Metadata = {
     siteName: "Radiordle",
     locale: "en_US",
     type: "website",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Radiordle - Daily Radiology Puzzle Game",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Radiordle - Daily Radiology Puzzle Game",
     description: "Can you guess the radiology puzzle of the day? Test your medical imaging knowledge in this daily radiology puzzle game!",
-    images: ["/og-image.png"],
   },
   robots: {
     index: true,
@@ -128,7 +119,7 @@ const jsonLd = {
         "@type": "Organization",
         "@id": "https://radiordle.org/#organization"
       },
-      "screenshot": "https://radiordle.org/og-image.png"
+      "screenshot": "https://radiordle.org/radle_icon.svg"
     },
     {
       "@type": "Organization",
