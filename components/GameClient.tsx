@@ -11,10 +11,10 @@ import {
   updateStatistics,
   updateArchiveStatistics,
   getStatistics,
-  getPlayerHash,
   updateGuessTimeStatistics,
   type GameState,
 } from '@/lib/localStorage';
+import { getOrCreatePlayerHash } from '@/lib/playerIdentity';
 import { submitGameResult } from '@/lib/supabase';
 
 // Toast feedback types
@@ -75,6 +75,14 @@ export default function GameClient({
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const guessStartTime = useRef<number>(Date.now());
   const gameStartTime = useRef<number>(Date.now());
+  const playerHashRef = useRef<string | null>(null);
+
+  // Initialize player hash on mount (async, stored in ref for later use)
+  useEffect(() => {
+    getOrCreatePlayerHash().then((hash) => {
+      playerHashRef.current = hash;
+    });
+  }, []);
 
   // Clear toast timeout on unmount
   useEffect(() => {
@@ -170,7 +178,7 @@ export default function GameClient({
           guess_count: newGuesses.length,
           hints_used: gameState.revealedHints,
           guesses: newGuesses,
-          player_hash: getPlayerHash(),
+          player_hash: playerHashRef.current,
           solve_time_seconds: totalSolveTime,
         }).then((submitResult) => {
           // Save the first solver status to localStorage (data still tracked, UI hidden)
@@ -203,7 +211,7 @@ export default function GameClient({
           guess_count: newGuesses.length,
           hints_used: gameState.revealedHints,
           guesses: newGuesses,
-          player_hash: getPlayerHash(),
+          player_hash: playerHashRef.current,
         });
         setShowModal(true);
       } else {

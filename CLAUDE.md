@@ -28,9 +28,13 @@ pnpm lint                 # Run ESLint
 - `lib/supabase.ts` - Supabase client, database queries, puzzle scheduling functions
 - `lib/gameLogic.ts` - Day number calculation (EST-based, hardcoded epoch), answer validation
 - `lib/localStorage.ts` - Per-day game state persistence, daily statistics, archive statistics
+- `lib/playerIdentity.ts` - Player hash management with 3-way redundant storage (localStorage/cookie/IndexedDB)
+- `lib/statsRecovery.ts` - Stats recovery from server when localStorage cleared
 - `components/GameClient.tsx` - Core game logic, guess handling, win/loss detection, results modal
 - `components/DiagnosisAutocomplete.tsx` - Searchable dropdown for condition selection with keyboard navigation
 - `components/ArchiveBrowser.tsx` - Scrollable list of past puzzles with completion status
+- `components/StatsRecoveryProvider.tsx` - Auto-recovery on page load, shows toast on success
+- `components/CookieConsent.tsx` - Mandatory data storage consent banner
 
 ### Puzzle Scheduling System
 
@@ -114,9 +118,10 @@ game_results
 ├── won (bool)
 ├── guess_count (int4) ← 1-5
 ├── hints_used (int4)
-├── time_to_complete_seconds (int4, nullable) ← not currently tracked
-├── player_hash (text, nullable) ← not currently tracked
+├── time_to_complete_seconds (int4, nullable)
+├── player_hash (text, nullable) ← anonymous player ID for stats recovery
 ├── guesses (text[], nullable)
+├── is_first_solver (bool) ← was this the first solve for this puzzle
 └── played_at (timestamptz)
 
 game_stats_overall (VIEW - computed from game_results)
@@ -233,3 +238,63 @@ Use URL parameter `?day=N` in development to test specific days:
 - `localhost:3000?day=50` → Day 50
 
 Note: Future days in dev return puzzles but don't save to database.
+
+## Player Identity & Data Protection
+
+### Player Hash System (`lib/playerIdentity.ts`)
+
+Anonymous player identification for stats recovery. Hash stored in 3 locations for redundancy:
+
+1. **localStorage** - Primary, fast access
+2. **Cookie** (`radiordle_pid`) - Survives localStorage clears, 1-year expiry
+3. **IndexedDB** (`radiordle_identity`) - Separate storage, often survives when localStorage cleared
+
+**Key Functions:**
+- `getOrCreatePlayerHash()` - Main entry point, async, uses singleton pattern to prevent race conditions
+- `checkBackupStorageOnly()` - Check backup locations WITHOUT restoring (used before recovery)
+- `syncExistingHashToBackups()` - Ensures existing users get their hash backed up
+- `storePlayerHash()` - Saves to all 3 locations
+
+### Stats Recovery System (`lib/statsRecovery.ts`)
+
+Recovers player statistics from server when localStorage is cleared but cookie/IndexedDB preserved.
+
+**Flow:**
+1. `StatsRecoveryProvider` runs on every page load (in `layout.tsx`)
+2. Checks if stats empty but backup hash exists
+3. Fetches stats from `/api/player-stats?hash=xxx`
+4. Restores to localStorage, shows success toast
+
+**Key Functions:**
+- `attemptStatsRecovery()` - Auto-runs on load, session-limited
+- `forceStatsRecovery()` - Manual trigger (for future "Recover Stats" button)
+
+### Recovery API (`/api/player-stats`)
+
+- Calculates stats from `game_results` table by `player_hash`
+- Maps puzzle_number → day_number via `puzzle_schedule` for streak calculation
+- Rate limited: 10 requests/minute per IP
+- Returns: gamesPlayed, gamesWon, streaks, guessDistribution
+
+### Cookie Consent (`components/CookieConsent.tsx`)
+
+- Mandatory acceptance (no decline option)
+- Uses localStorage, not actual HTTP cookies for game data
+- Consent stored in `radiordle_cookie_consent` key
+
+### Data Storage Keys (localStorage)
+
+| Key | Purpose |
+|-----|---------|
+| `radiordle_player_hash` | Anonymous player ID |
+| `radiordle_statistics` | Daily stats (games, streaks, distribution) |
+| `radiordle_archive_statistics` | Archive-only stats |
+| `radiordle_game_day_[N]` | Per-day game state |
+| `radiordle_cookie_consent` | Consent status |
+| `radiordle_feedback_cooldown` | Feedback rate limiting |
+
+### Known Limitations
+
+1. **Streaks not perfectly recoverable** - Server has game results but not original streak state
+2. **Archive stats not recovered** - Only daily statistics restored
+3. **`totalGuessTime` not recovered** - Server doesn't store per-guess timing

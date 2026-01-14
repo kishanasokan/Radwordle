@@ -31,33 +31,18 @@ const GAME_STATE_PREFIX = 'radiordle_game_day_';
 const STATISTICS_KEY = 'radiordle_statistics';
 const ARCHIVE_STATISTICS_KEY = 'radiordle_archive_statistics';
 const OLD_GAME_STATE_KEY = 'radiordle_game_state';
-const PLAYER_HASH_KEY = 'radiordle_player_hash';
-
 /**
- * Generates a random player hash for anonymous identification.
- * This is NOT cryptographically secure, just unique enough for analytics.
- */
-function generatePlayerHash(): string {
-  const timestamp = Date.now().toString(36);
-  const randomPart = Math.random().toString(36).substring(2, 15);
-  const randomPart2 = Math.random().toString(36).substring(2, 15);
-  return `${timestamp}-${randomPart}${randomPart2}`;
-}
-
-/**
- * Gets or creates a persistent player hash for this browser.
- * Used to anonymously identify players for first-solver tracking.
+ * Gets the player hash synchronously from localStorage.
+ * For the full persistent player hash with cookie/IndexedDB backup,
+ * use getOrCreatePlayerHash() from playerIdentity.ts
+ *
+ * @deprecated Use getOrCreatePlayerHash() from playerIdentity.ts for new code
  */
 export function getPlayerHash(): string | null {
   if (typeof window === 'undefined') return null;
 
   try {
-    let hash = localStorage.getItem(PLAYER_HASH_KEY);
-    if (!hash) {
-      hash = generatePlayerHash();
-      localStorage.setItem(PLAYER_HASH_KEY, hash);
-    }
-    return hash;
+    return localStorage.getItem('radiordle_player_hash');
   } catch (error) {
     console.error('Error getting player hash:', error);
     return null;

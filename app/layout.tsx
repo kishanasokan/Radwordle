@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Fredoka, Baloo_2, Poppins } from "next/font/google";
 import "./globals.css";
 import CookieConsent from "@/components/CookieConsent";
+import StatsRecoveryProvider from "@/components/StatsRecoveryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -204,6 +205,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {children}
+        <StatsRecoveryProvider />
         <CookieConsent />
       </body>
     </html>
