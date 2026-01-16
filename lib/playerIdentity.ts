@@ -4,6 +4,7 @@
  * Stores the player_hash in multiple locations for redundancy:
  * 1. localStorage (primary, fast)
  * 2. Cookie (survives localStorage clears, 1 year expiry)
+ *    - Set via HTTP header for Safari ITP compatibility
  * 3. IndexedDB (separate storage, often survives when localStorage is cleared)
  *
  * On retrieval, checks all locations and restores to localStorage if found elsewhere.
@@ -33,12 +34,47 @@ function generatePlayerHash(): string {
 // Cookie Functions
 // ============================================
 
-function setCookie(value: string): void {
+/**
+ * Sets cookie via JavaScript (fallback).
+ * Note: Safari ITP may delete JS-set cookies after 7 days.
+ */
+function setCookieJS(value: string): void {
   try {
     document.cookie = `${COOKIE_NAME}=${encodeURIComponent(value)}; max-age=${COOKIE_MAX_AGE_SECONDS}; path=/; SameSite=Lax`;
   } catch (error) {
-    console.error('Error setting cookie:', error);
+    console.error('Error setting cookie via JS:', error);
   }
+}
+
+/**
+ * Sets cookie via HTTP header (Safari ITP compatible).
+ * This makes the cookie "server-side" which Safari respects more.
+ */
+async function setCookieHTTP(value: string): Promise<boolean> {
+  try {
+    const response = await fetch('/api/set-player-id', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId: value }),
+    });
+    return response.ok;
+  } catch (error) {
+    console.error('Error setting cookie via HTTP:', error);
+    return false;
+  }
+}
+
+/**
+ * Sets cookie using both methods for maximum compatibility.
+ * - HTTP method for Safari ITP
+ * - JS method as immediate fallback
+ */
+async function setCookie(value: string): Promise<void> {
+  // Set via JS immediately (works on all browsers)
+  setCookieJS(value);
+
+  // Also set via HTTP for Safari ITP compatibility (fire and forget)
+  setCookieHTTP(value).catch(() => {});
 }
 
 function getCookie(): string | null {
@@ -193,7 +229,7 @@ function getLocalStorage(): string | null {
  */
 export async function storePlayerHash(hash: string): Promise<void> {
   setLocalStorage(hash);
-  setCookie(hash);
+  await setCookie(hash); // Now async for HTTP call
   await setIDB(hash).catch(() => {
     // IndexedDB failure is non-fatal
   });
@@ -215,7 +251,7 @@ export async function syncExistingHashToBackups(): Promise<void> {
 
   // Sync to any missing backup locations
   if (cookieHash !== localHash) {
-    setCookie(localHash);
+    await setCookie(localHash);
   }
   if (idbHash !== localHash) {
     await setIDB(localHash).catch(() => {});
@@ -281,7 +317,7 @@ export async function retrievePlayerHash(): Promise<string | null> {
     if (hash) {
       console.log('Restored player hash from IndexedDB');
       setLocalStorage(hash);
-      setCookie(hash);
+      await setCookie(hash);
       return hash;
     }
   } catch (error) {
