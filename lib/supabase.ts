@@ -348,7 +348,7 @@ export async function submitGameResult(result: GameResultInput): Promise<GameRes
       guesses: result.guesses,
       player_hash: result.player_hash,
       is_first_solver: isFirstSolver,
-      solve_time_seconds: result.solve_time_seconds,
+      time_to_complete_seconds: result.solve_time_seconds,
     });
 
   if (error) {
