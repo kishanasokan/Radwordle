@@ -348,11 +348,21 @@ export async function submitGameResult(result: GameResultInput): Promise<GameRes
       guesses: result.guesses,
       player_hash: result.player_hash,
       is_first_solver: isFirstSolver,
-      time_to_complete_seconds: result.solve_time_seconds,
+      time_to_complete_seconds: result.solve_time_seconds ? Math.round(result.solve_time_seconds) : null,
     });
 
   if (error) {
-    console.error('Error submitting game result:', error);
+    console.error('Error submitting game result:', JSON.stringify(error, null, 2));
+    console.error('Insert payload was:', {
+      puzzle_number: result.puzzle_number,
+      won: result.won,
+      guess_count: result.guess_count,
+      hints_used: result.hints_used,
+      guesses: result.guesses,
+      player_hash: result.player_hash,
+      is_first_solver: isFirstSolver,
+      time_to_complete_seconds: result.solve_time_seconds,
+    });
     // Don't throw - we don't want to break the game if analytics fail
   }
 
