@@ -14,6 +14,9 @@ pnpm install              # Install dependencies
 pnpm dev                  # Start development server (http://localhost:3000)
 pnpm build                # Production build
 pnpm lint                 # Run ESLint
+pnpm test                 # Run all tests (vitest)
+pnpm test:watch           # Run tests in watch mode
+pnpm test:coverage        # Run tests with coverage report
 ```
 
 ## Architecture
@@ -29,6 +32,7 @@ pnpm lint                 # Run ESLint
 - `lib/gameLogic.ts` - Day number calculation (EST-based, hardcoded epoch), answer validation
 - `lib/localStorage.ts` - Per-day game state persistence, daily statistics, archive statistics
 - `lib/playerIdentity.ts` - Player hash management with 3-way redundant storage (localStorage/cookie/IndexedDB)
+- `lib/statsCalculation.ts` - Stats calculation from game results (streaks, distribution) — extracted from player-stats API route
 - `lib/statsRecovery.ts` - Stats recovery from server when localStorage cleared
 - `components/GameClient.tsx` - Core game logic, guess handling, win/loss detection, results modal
 - `components/DiagnosisAutocomplete.tsx` - Searchable dropdown for condition selection with keyboard navigation
@@ -230,6 +234,70 @@ Each guess is evaluated and returns one of three results:
 4. Previous hint gets colored based on the guess that followed it
 5. Maximum 5 guesses, 4 hints total
 6. Game ends on correct guess or after 5 attempts
+
+## Testing
+
+### Stack
+
+- **Vitest** — test runner (ESM-native, TS-native, supports `@/*` alias)
+- **@testing-library/react** + **@testing-library/user-event** — component tests
+- **@testing-library/jest-dom** — DOM assertion matchers
+- **jsdom** — browser environment for component/integration tests
+- **fake-indexeddb** — IndexedDB polyfill for playerIdentity tests
+
+### Test Structure
+
+```
+__tests__/
+  setup.ts                              # Global setup (jest-dom matchers, scrollIntoView polyfill)
+  unit/
+    gameLogic.test.ts                   # checkAnswer, getDayNumber, dayNumberToDate
+    supabase.pure.test.ts              # getHintsFromPuzzle, calculatePercentileBeat
+    statsCalculation.test.ts           # calculateStatsFromResults (extracted from API route)
+  integration/
+    localStorage.test.ts              # All localStorage functions
+    api/
+      feedback.test.ts                 # POST /api/feedback
+      player-stats.test.ts             # GET /api/player-stats
+      set-player-id.test.ts            # POST/GET /api/set-player-id
+  component/
+    DiagnosisAutocomplete.test.tsx     # Filtering, keyboard nav, validation
+    GameClient.test.tsx                # Guess flow, win/loss, persistence
+    ArchiveBrowser.test.tsx            # Day list, status badges
+    CookieConsent.test.tsx             # Consent flow
+```
+
+### Config
+
+- `vitest.config.ts` — central config with `@/*` alias, `node` default environment
+- Per-file jsdom override via `// @vitest-environment jsdom` comment at top of file
+- `__tests__/setup.ts` — global setup loaded for all tests
+
+### Mocking Patterns
+
+| Dependency | Mock approach |
+|---|---|
+| **Supabase** | `vi.mock('@supabase/supabase-js')` with chainable `.from().select()` |
+| **localStorage** | jsdom's built-in `localStorage` with `clear()` in `beforeEach` |
+| **Environment vars** | `vi.hoisted()` to set `process.env` before module-level Supabase client init |
+| **Next.js Image/Link** | Simple HTML element mocks |
+| **Next.js navigation** | `vi.mock('next/navigation')` with stub router |
+
+### Key Testing Notes
+
+- **`vi.hoisted()`** is required for setting env vars and declaring mock variables — `vi.mock()` factories are hoisted above `const` declarations
+- **GameClient renders dual layouts** (desktop + mobile) — use `getAllBy*` queries and index `[0]` for the desktop input
+- **jsdom lacks `scrollIntoView`** — polyfilled as a no-op in `setup.ts`
+- **`lib/statsCalculation.ts`** was extracted from `app/api/player-stats/route.ts` to enable unit testing of streak/distribution calculation
+
+### CI Pipeline
+
+GitHub Actions (`.github/workflows/ci.yml`) runs on every push to `main` and every PR:
+- **Lint & Type Check** — `pnpm lint` + `pnpm tsc --noEmit`
+- **Tests** — `pnpm test` (154 tests across 11 files)
+- **Production Build** — `pnpm build`
+
+All three jobs run in parallel. Fake Supabase env vars are set at the workflow level.
 
 ## Dev Testing
 
