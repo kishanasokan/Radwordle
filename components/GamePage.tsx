@@ -31,7 +31,10 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
 
   // Load stats on mount and when game state changes
   useEffect(() => {
-    setStats(getStatistics());
+    // Wrap in Promise to avoid synchronous setState in effect
+    Promise.resolve().then(() => {
+      setStats(getStatistics());
+    });
   }, [gameState?.isComplete]);
 
   const handleGameStateChange = useCallback((state: GameState) => {

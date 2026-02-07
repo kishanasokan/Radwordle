@@ -6,22 +6,22 @@ import GamePage from '@/components/GamePage';
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  try {
-    const dayNumber = getDayNumber();
-    const puzzle = await getTodaysPuzzle();
-    const hints = getHintsFromPuzzle(puzzle);
-    const conditions = await getAllConditions();
+  let dayNumber: number;
+  let puzzle;
+  let hints;
+  let conditions;
+  let error: Error | null = null;
 
-    return (
-      <GamePage
-        puzzle={puzzle}
-        hints={hints}
-        conditions={conditions}
-        dayNumber={dayNumber}
-        isArchive={false}
-      />
-    );
-  } catch (error) {
+  try {
+    dayNumber = getDayNumber();
+    puzzle = await getTodaysPuzzle();
+    hints = getHintsFromPuzzle(puzzle);
+    conditions = await getAllConditions();
+  } catch (err) {
+    error = err instanceof Error ? err : new Error('Unknown error occurred');
+  }
+
+  if (error) {
     return (
       <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 p-8">
         <div className="max-w-4xl mx-auto">
@@ -30,7 +30,7 @@ export default async function Home() {
               ❌ Error Connecting to Supabase
             </h2>
             <p className="text-red-700 dark:text-red-300">
-              {error instanceof Error ? error.message : 'Unknown error occurred'}
+              {error.message}
             </p>
             <div className="mt-4 text-sm text-red-600 dark:text-red-400">
               <p>Please check:</p>
@@ -46,4 +46,14 @@ export default async function Home() {
       </div>
     );
   }
+
+  return (
+    <GamePage
+      puzzle={puzzle!}
+      hints={hints!}
+      conditions={conditions!}
+      dayNumber={dayNumber!}
+      isArchive={false}
+    />
+  );
 }

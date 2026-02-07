@@ -27,21 +27,20 @@ export default async function ArchiveDayPage({ params }: ArchiveDayPageProps) {
     redirect('/');
   }
 
-  try {
-    const puzzle = await getPuzzleForDay(dayNumber);
-    const hints = getHintsFromPuzzle(puzzle);
-    const conditions = await getAllConditions();
+  let puzzle;
+  let hints;
+  let conditions;
+  let error: Error | null = null;
 
-    return (
-      <GamePage
-        puzzle={puzzle}
-        hints={hints}
-        conditions={conditions}
-        dayNumber={dayNumber}
-        isArchive={true}
-      />
-    );
-  } catch (error) {
+  try {
+    puzzle = await getPuzzleForDay(dayNumber);
+    hints = getHintsFromPuzzle(puzzle);
+    conditions = await getAllConditions();
+  } catch (err) {
+    error = err instanceof Error ? err : new Error('Unknown error occurred');
+  }
+
+  if (error) {
     return (
       <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 p-8">
         <div className="max-w-4xl mx-auto">
@@ -50,11 +49,21 @@ export default async function ArchiveDayPage({ params }: ArchiveDayPageProps) {
               Error Loading Archive Puzzle
             </h2>
             <p className="text-red-700 dark:text-red-300">
-              {error instanceof Error ? error.message : 'Unknown error occurred'}
+              {error.message}
             </p>
           </div>
         </div>
       </div>
     );
   }
+
+  return (
+    <GamePage
+      puzzle={puzzle!}
+      hints={hints!}
+      conditions={conditions!}
+      dayNumber={dayNumber}
+      isArchive={true}
+    />
+  );
 }
