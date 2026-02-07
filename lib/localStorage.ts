@@ -67,7 +67,6 @@ function migrateOldGameState(): void {
     const oldState = localStorage.getItem(OLD_GAME_STATE_KEY);
     if (!oldState) return;
 
-    const parsed = JSON.parse(oldState);
     // Old format used puzzleNumber, but we need to map to dayNumber
     // Since we can't reliably map puzzleNumber to dayNumber, we'll just clear it
     // Users will lose their current game state but keep their statistics

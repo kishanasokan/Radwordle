@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import GameClient from '@/components/GameClient'
 
@@ -82,21 +82,23 @@ beforeEach(() => {
 
 describe('GameClient', () => {
   describe('initialization', () => {
-    it('creates new game state when no saved state', () => {
+    it('creates new game state when no saved state', async () => {
       render(<GameClient {...defaultProps} />)
 
-      expect(defaultProps.onGameStateChange).toHaveBeenCalledWith(
-        expect.objectContaining({
-          dayNumber: 5,
-          guesses: [],
-          guessResults: [],
-          isComplete: false,
-          isWon: false,
-        })
-      )
+      await waitFor(() => {
+        expect(defaultProps.onGameStateChange).toHaveBeenCalledWith(
+          expect.objectContaining({
+            dayNumber: 5,
+            guesses: [],
+            guessResults: [],
+            isComplete: false,
+            isWon: false,
+          })
+        )
+      })
     })
 
-    it('loads saved game state from localStorage', () => {
+    it('loads saved game state from localStorage', async () => {
       const savedState = {
         dayNumber: 5,
         guesses: ['Pneumonia'],
@@ -110,7 +112,9 @@ describe('GameClient', () => {
 
       render(<GameClient {...defaultProps} />)
 
-      expect(defaultProps.onGameStateChange).toHaveBeenCalledWith(savedState)
+      await waitFor(() => {
+        expect(defaultProps.onGameStateChange).toHaveBeenCalledWith(savedState)
+      })
     })
 
     it('shows modal immediately if game was already complete', () => {

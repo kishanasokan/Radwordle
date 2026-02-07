@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { getDayNumber, dayNumberToDate } from '@/lib/gameLogic';
 import { getDayStatus } from '@/lib/localStorage';
@@ -12,10 +12,7 @@ interface ArchiveDay {
 }
 
 export default function ArchiveBrowser() {
-  const [days, setDays] = useState<ArchiveDay[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
+  const days = useMemo(() => {
     const today = getDayNumber();
     const archiveDays: ArchiveDay[] = [];
 
@@ -33,8 +30,7 @@ export default function ArchiveBrowser() {
       });
     }
 
-    setDays(archiveDays);
-    setIsLoading(false);
+    return archiveDays;
   }, []);
 
   const getStatusBadge = (status: 'won' | 'lost' | 'not_played') => {
@@ -59,14 +55,6 @@ export default function ArchiveBrowser() {
         );
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-white text-lg">Loading archive...</div>
-      </div>
-    );
-  }
 
   const today = getDayNumber();
 

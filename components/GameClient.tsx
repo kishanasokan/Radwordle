@@ -69,20 +69,50 @@ export default function GameClient({
   onTypingStateChange,
 }: GameClientProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [gameState, setGameState] = useState<GameState | null>(null);
-  const [showModal, setShowModal] = useState(false);
+  // Lazy initialize game state from localStorage
+  const [gameState, setGameState] = useState<GameState | null>(() => {
+    const savedState = getGameState(dayNumber);
+    if (savedState) {
+      return savedState;
+    }
+    // Initialize new game state
+    return {
+      dayNumber,
+      guesses: [],
+      guessResults: [],
+      revealedHints: 0,
+      isComplete: false,
+      isWon: false,
+      hasPartialMatch: false,
+    };
+  });
+  const [showModal, setShowModal] = useState(() => gameState?.isComplete || false);
   const [toast, setToast] = useState<ToastType>(null);
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const guessStartTime = useRef<number>(Date.now());
-  const gameStartTime = useRef<number>(Date.now());
+  const guessStartTime = useRef<number>(0);
+  const gameStartTime = useRef<number>(0);
   const playerHashRef = useRef<string | null>(null);
 
-  // Initialize player hash on mount (async, stored in ref for later use)
+  // Initialize timing refs and player hash on mount
   useEffect(() => {
+    const now = Date.now();
+    guessStartTime.current = now;
+    gameStartTime.current = now;
+
     getOrCreatePlayerHash().then((hash) => {
       playerHashRef.current = hash;
     });
   }, []);
+
+  // Notify parent of initial game state
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      if (gameState) {
+        onGameStateChange(gameState);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only on mount, intentionally excluding gameState/onGameStateChange
 
   // Clear toast timeout on unmount
   useEffect(() => {
@@ -108,34 +138,6 @@ export default function GameClient({
       setToast(null);
     }, duration);
   }, []);
-
-  // Initialize game state from localStorage
-  useEffect(() => {
-    const savedState = getGameState(dayNumber);
-
-    if (savedState) {
-      setGameState(savedState);
-      onGameStateChange(savedState);
-
-      // Show modal if game is already complete
-      if (savedState.isComplete) {
-        setShowModal(true);
-      }
-    } else {
-      // Initialize new game state
-      const newState: GameState = {
-        dayNumber,
-        guesses: [],
-        guessResults: [],
-        revealedHints: 0,
-        isComplete: false,
-        isWon: false,
-        hasPartialMatch: false,
-      };
-      setGameState(newState);
-      onGameStateChange(newState);
-    }
-  }, [dayNumber, onGameStateChange]);
 
   const handleSubmit = useCallback(
     (diagnosis: string) => {

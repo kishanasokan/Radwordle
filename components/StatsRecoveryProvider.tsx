@@ -8,13 +8,11 @@ import { attemptStatsRecovery } from '@/lib/statsRecovery';
  * Shows a brief notification if stats were recovered.
  */
 export default function StatsRecoveryProvider() {
-  const [recovered, setRecovered] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
     attemptStatsRecovery().then((wasRecovered) => {
       if (wasRecovered) {
-        setRecovered(true);
         setShowNotification(true);
         // Hide notification after 4 seconds
         setTimeout(() => setShowNotification(false), 4000);
