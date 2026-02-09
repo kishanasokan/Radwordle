@@ -129,6 +129,57 @@ The homepage serves as a test page that displays:
 
 If you see the green "Supabase Connected" message, everything is working correctly.
 
+## Testing
+
+### Unit & Integration Tests (Vitest)
+
+```bash
+pnpm test                 # Run all 154 tests
+pnpm test:watch           # Run in watch mode (re-runs on file changes)
+pnpm test:coverage        # Run with coverage report
+```
+
+### End-to-End Tests (Playwright)
+
+E2E tests run against the real app in a Chromium browser. The dev server starts automatically.
+
+```bash
+pnpm e2e                  # Run all 55 E2E tests (headless)
+pnpm e2e:headed           # Run with browser visible (watch tests execute)
+pnpm e2e:ui               # Open Playwright's interactive test picker UI
+```
+
+**Run a single test by name:**
+```bash
+pnpm e2e --headed --grep "should complete first-time user journey"
+```
+
+**Run a specific test file:**
+```bash
+pnpm e2e e2e/tests/mobile-responsive.spec.ts
+```
+
+**Fun tests to watch in headed mode:**
+| Command | What it does |
+|---|---|
+| `--grep "should complete first-time user journey"` | Accepts cookies, makes a wrong guess, then wins |
+| `--grep "should show game over after 5 incorrect"` | Makes 5 wrong guesses with hints revealing each time |
+| `--grep "should complete a full game on mobile"` | Plays a full game on a 390x844 iPhone viewport |
+| `--grep "should simulate multi-day play"` | Wins today's game, then plays an archive game |
+| `--grep "should show WON badge"` | Wins an archive game, goes back to verify WON badge |
+
+**E2E test coverage (10 spec files):**
+- First-time user journey (cookie consent, win flow, persistence, stats)
+- Losing game flow (5 wrong guesses, hints, game over)
+- Archive mode (browsing, separate stats, WON badge)
+- Autocomplete & validation (dropdown, keyboard nav, error messages)
+- Toast notifications (correct/incorrect/partial feedback)
+- Mobile responsiveness (iPhone 12 viewport)
+- Stats recovery (localStorage cleared, cookie/IndexedDB backup)
+- Network failure handling (Supabase down, graceful degradation)
+- Multi-day progression (per-day state, streaks, guess distribution)
+- Guess time tracking (timing in localStorage)
+
 ## Building for Production
 
 ```bash

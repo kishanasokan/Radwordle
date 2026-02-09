@@ -299,6 +299,43 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every push to `main` and eve
 
 All three jobs run in parallel. Fake Supabase env vars are set at the workflow level.
 
+### E2E Tests (Playwright)
+
+```bash
+pnpm e2e                  # Run all E2E tests (headless)
+pnpm e2e:headed           # Run E2E tests with browser visible
+pnpm e2e:ui               # Open Playwright's interactive UI
+```
+
+**Stack**: Playwright with Chromium, tests against running dev server.
+
+**Config**: `playwright.config.ts` — auto-starts `pnpm dev`, runs on `http://localhost:3000`.
+
+**Test Structure** (55 tests across 10 files):
+```
+e2e/
+  fixtures/
+    helpers.ts                        # Shared utilities, selectors, mocks
+  tests/
+    first-time-user.spec.ts          # Cookie consent, full game flow, persistence
+    losing-game.spec.ts              # 5 incorrect guesses, hints, game over
+    archive-mode.spec.ts             # Archive browsing, separate stats, WON badge
+    autocomplete.spec.ts             # Dropdown, keyboard nav, validation
+    toast-notifications.spec.ts      # Correct/incorrect/partial toasts
+    mobile-responsive.spec.ts        # iPhone 12 viewport (390x844), fixed input
+    stats-recovery.spec.ts           # localStorage recovery from cookie/IndexedDB
+    network-failure.spec.ts          # Supabase down, graceful degradation
+    multi-day-progression.spec.ts    # Per-day state, streaks, guess distribution
+    guess-time-tracking.spec.ts      # Time tracking in localStorage
+```
+
+**Key Patterns**:
+- **Dual layout handling**: App renders desktop + mobile layouts simultaneously. Helpers use Playwright's `:visible` pseudo-class (e.g., `page.locator('input[placeholder="Diagnosis..."]:visible')`) to automatically select the correct layout for the active viewport.
+- **Answer extraction**: `extractCorrectAnswer()` parses the RSC flight data from `document.documentElement.innerHTML`. RSC uses escaped quotes (`\"answer\":\"...\"`) on initial page load.
+- **Archive page navigation**: Use `page.goto(href)` (full page load) instead of clicking archive links (client-side navigation) to ensure answer data is embedded in HTML.
+- **Supabase mocking**: `mockSupabaseClientCalls()` intercepts client-side REST calls to prevent real DB writes during tests.
+- **CI Workflow**: `.github/workflows/e2e.yml` — requires Supabase secrets, installs Chromium, uploads HTML report artifacts on failure.
+
 ## Dev Testing
 
 Use URL parameter `?day=N` in development to test specific days:
