@@ -32,8 +32,12 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'images.radiordle.org',
       },
+      {
+        protocol: 'https',
+        hostname: 'ars.els-cdn.com',
+      },
     ],
-    unoptimized: false, // Enable Next.js image optimization for better performance
+    unoptimized: true,
   },
 };
 
