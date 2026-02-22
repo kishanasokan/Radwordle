@@ -60,6 +60,12 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
     imageBorderStyle = 'ring-4 ring-[#9e4a4a] shadow-[0_0_20px_rgba(158,74,74,0.6)]';
   }
 
+  // Annotated image: show after first guess if a valid URL is provided
+  const annotatedImageUrl = puzzle.annotated_image_url?.startsWith('http')
+    ? puzzle.annotated_image_url
+    : null;
+  const showAnnotated = !!annotatedImageUrl && (gameState?.guesses.length ?? 0) >= 1;
+
   return (
     <div className="min-h-screen sm:min-h-screen min-h-screen-safe relative overflow-y-auto overflow-x-hidden">
       {/* Gradient Background */}
@@ -184,6 +190,18 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
               ) : (
                 <div className="flex items-center justify-center h-full text-white">
                   <p>No image available</p>
+                </div>
+              )}
+              {/* Annotated image overlay — fades in after first guess */}
+              {annotatedImageUrl && (
+                <div className={`absolute inset-0 transition-opacity duration-300 ${showAnnotated ? 'opacity-100' : 'opacity-0'}`}>
+                  <Image
+                    src={annotatedImageUrl}
+                    alt={`Puzzle ${puzzle.puzzle_number} annotated`}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 896px"
+                  />
                 </div>
               )}
             </div>

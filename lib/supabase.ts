@@ -32,6 +32,7 @@ export interface Puzzle {
   hint_4: string | null;
   citation?: string | null;
   learn_link?: string | null;
+  annotated_image_url?: string | null;
   created_at?: string;
 }
 
