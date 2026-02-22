@@ -249,6 +249,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
             dayNumber={dayNumber}
             puzzleNumber={puzzle.puzzle_number}
             correctAnswer={puzzle.answer}
+            citation={puzzle.citation}
             isArchive={isArchive}
             onGameStateChange={handleGameStateChange}
           />

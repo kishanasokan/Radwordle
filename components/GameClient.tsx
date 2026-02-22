@@ -32,6 +32,7 @@ interface GameClientProps {
   dayNumber: number;
   puzzleNumber: number;
   correctAnswer: string;
+  citation?: string | null;
   isArchive: boolean;
   onGameStateChange: (state: GameState) => void;
   onTypingStateChange?: (isTyping: boolean) => void;
@@ -64,6 +65,7 @@ export default function GameClient({
   dayNumber,
   puzzleNumber,
   correctAnswer,
+  citation,
   isArchive,
   onGameStateChange,
   onTypingStateChange,
@@ -354,6 +356,7 @@ export default function GameClient({
           guessCount={gameState.guesses.length}
           guesses={gameState.guesses}
           correctAnswer={correctAnswer}
+          citation={citation}
           dayNumber={dayNumber}
           isArchive={isArchive}
           onClose={handleCloseModal}
@@ -368,6 +371,7 @@ interface ResultsModalProps {
   guessCount: number;
   guesses: string[];
   correctAnswer: string;
+  citation?: string | null;
   dayNumber: number;
   isArchive: boolean;
   onClose: () => void;
@@ -378,6 +382,7 @@ function ResultsModal({
   guessCount,
   guesses,
   correctAnswer,
+  citation,
   dayNumber,
   isArchive,
   onClose,
@@ -485,6 +490,11 @@ function ResultsModal({
           ) : (
             <p className="text-base sm:text-lg font-light">
               The correct answer was: {correctAnswer}
+            </p>
+          )}
+          {citation && (
+            <p className="text-xs mt-2 italic text-white/70">
+              {citation}
             </p>
           )}
         </div>
