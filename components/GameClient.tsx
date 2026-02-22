@@ -526,7 +526,7 @@ function ResultsModal({
             </div>
             <div>
               <p className="text-xl sm:text-2xl font-bold text-[#407763] leading-tight">{stats.currentStreak}</p>
-              <p className="text-xs text-gray-600">Current Streak</p>
+              <p className="text-xs text-gray-600">Streak</p>
             </div>
             <div>
               <p className="text-xl sm:text-2xl font-bold text-[#407763] leading-tight">{stats.maxStreak}</p>
@@ -598,7 +598,7 @@ function ResultsModal({
                   <p className="font-bold text-white">{userAvgGuesses > 0 ? userAvgGuesses.toFixed(1) : '-'}</p>
                 </div>
                 <div>
-                  <p className="text-gray-300">Avg Guess Time</p>
+                  <p className="text-gray-300">Avg Time</p>
                   <p className="font-bold text-white">{avgGuessTime > 0 ? `${avgGuessTime.toFixed(1)}s` : '-'}</p>
                 </div>
               </div>
@@ -656,7 +656,7 @@ function ResultsModal({
                 <p className="font-bold text-white">{userAvgGuesses > 0 ? userAvgGuesses.toFixed(1) : '-'}</p>
               </div>
               <div>
-                <p className="text-gray-300">Avg Guess Time</p>
+                <p className="text-gray-300">Avg Time</p>
                 <p className="font-bold text-white">{avgGuessTime > 0 ? `${avgGuessTime.toFixed(1)}s` : '-'}</p>
               </div>
             </div>
