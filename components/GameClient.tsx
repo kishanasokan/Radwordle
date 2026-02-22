@@ -571,7 +571,7 @@ function ResultsModal({
         </button>
 
         {/* Learn More Button */}
-        {learnLink && (
+        {learnLink?.startsWith('http') && (
           <a
             href={learnLink}
             target="_blank"
