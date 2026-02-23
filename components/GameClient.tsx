@@ -18,7 +18,7 @@ import { getOrCreatePlayerHash } from '@/lib/playerIdentity';
 import { submitGameResult } from '@/lib/supabase';
 
 // Toast feedback types
-type ToastType = 'correct' | 'partial' | 'incorrect' | null;
+type ToastType = 'correct' | 'partial' | 'incorrect' | 'copied' | null;
 
 interface ToastConfig {
   message: string;
@@ -58,6 +58,12 @@ const TOAST_CONFIG: Record<Exclude<ToastType, null>, ToastConfig> = {
     bgColor: 'bg-red-500',
     textColor: 'text-white',
     icon: '✗',
+  },
+  copied: {
+    message: 'Results copied to clipboard!',
+    bgColor: 'bg-blue-600',
+    textColor: 'text-white',
+    icon: '📋',
   },
 };
 
@@ -257,7 +263,7 @@ export default function GameClient({
         <div
           role="status"
           aria-live="polite"
-          className={`fixed top-20 left-1/2 z-50 px-6 py-3 rounded-lg shadow-lg
+          className={`fixed top-20 left-1/2 z-[200] px-6 py-3 rounded-lg shadow-lg
             ${TOAST_CONFIG[toast].bgColor} ${TOAST_CONFIG[toast].textColor}
             animate-toast-in
             font-baloo-2 font-semibold text-lg flex items-center gap-2`}
@@ -363,6 +369,7 @@ export default function GameClient({
           dayNumber={dayNumber}
           isArchive={isArchive}
           onClose={handleCloseModal}
+          onCopied={() => showToast('copied')}
         />
       )}
     </>
@@ -379,6 +386,7 @@ interface ResultsModalProps {
   dayNumber: number;
   isArchive: boolean;
   onClose: () => void;
+  onCopied: () => void;
 }
 
 function ResultsModal({
@@ -391,6 +399,7 @@ function ResultsModal({
   dayNumber,
   isArchive,
   onClose,
+  onCopied,
 }: ResultsModalProps) {
   const stats = getStatistics();
   const [globalStats, setGlobalStats] = useState<GlobalStats | null>(null);
@@ -455,14 +464,28 @@ function ResultsModal({
     const prefix = isArchive ? '🩻 Radiordle Archive Day' : '🩻 Radiordle Day';
     const shareText = `${prefix} ${displayDay} ${isWon ? guessCount : 'X'}/${MAX_GUESSES}\n${fullGrid}\nhttps://radiordle.org`;
 
-    navigator.clipboard.writeText(shareText).then(
-      () => {
-        alert('Results copied to clipboard!');
-      },
-      () => {
-        alert('Failed to copy results.');
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(shareText).then(
+        () => { onCopied(); },
+        () => { onCopied(); }
+      );
+    } else {
+      // Fallback for iOS Safari and browsers without Clipboard API
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = shareText;
+        textArea.style.position = 'fixed';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        onCopied();
+      } catch {
+        // Silent fail
       }
-    );
+    }
   }, [guesses, correctAnswer, dayNumber, isWon, guessCount, isArchive]);
 
   return (
