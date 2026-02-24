@@ -24,15 +24,42 @@
 
 /* Scale down for smaller laptop screens */
 /* Only applies below 1600px — larger screens are completely untouched */
+/* --full-vh compensates min-height so zoomed content fills the actual viewport */
+:root {
+  --full-vh: 100vh;
+}
+@supports (height: 100dvh) {
+  :root {
+    --full-vh: 100dvh;
+  }
+}
 @media (min-width: 640px) and (max-width: 1199px) {
   html {
     zoom: 0.7;
+  }
+  :root {
+    --full-vh: calc(100vh / 0.7);
   }
 }
 @media (min-width: 1200px) and (max-width: 1599px) {
   html {
     zoom: 0.8;
   }
+  :root {
+    --full-vh: calc(100vh / 0.8);
+  }
+}
+@media (min-width: 1600px) {
+  html {
+    zoom: 0.9;
+  }
+  :root {
+    --full-vh: calc(100vh / 0.9);
+  }
+}
+
+html {
+  background: #0f172a;
 }
 
 body {
