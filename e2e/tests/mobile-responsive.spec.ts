@@ -82,7 +82,7 @@ test.describe('Mobile Responsiveness', () => {
     await makeIncorrectGuess(page, SEARCH_TERMS[0], correctAnswer);
 
     // Verify guess counter updates (use :visible to skip hidden desktop layout)
-    await expect(page.locator('p:visible:has-text("Guesses: 1 / 5")')).toBeVisible();
+    await expect(page.locator('p:visible:has-text("Guess 2 / 5")')).toBeVisible();
 
     // Make the correct guess
     await submitGuess(page, correctAnswer);
@@ -107,7 +107,7 @@ test.describe('Mobile Responsiveness', () => {
     await page.evaluate(() => localStorage.removeItem('radiordle_cookie_consent'));
     await page.reload();
 
-    const banner = page.getByText('Data Storage Notice');
+    const banner = page.getByText('Radiordle uses local storage', { exact: false });
     await expect(banner).toBeVisible({ timeout: 3000 });
 
     // Banner should not cause horizontal overflow
@@ -117,7 +117,7 @@ test.describe('Mobile Responsiveness', () => {
     expect(hasHorizontalScroll).toBe(false);
 
     // Accept it
-    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByRole('button', { name: 'Got it' }).click();
     await expect(banner).not.toBeVisible();
   });
 

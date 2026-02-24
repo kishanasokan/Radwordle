@@ -29,8 +29,8 @@ test.describe('Losing Game Flow', () => {
       await makeIncorrectGuess(page, SEARCH_TERMS[i], correctAnswer);
 
       if (i < 4) {
-        // Verify guess counter updates
-        await expect(page.getByText(`Guesses: ${i + 1} / 5`).first()).toBeVisible();
+        // Verify guess counter updates (shows next guess number, 1-indexed)
+        await expect(page.getByText(`Guess ${i + 2} / 5`).first()).toBeVisible();
       }
     }
 
@@ -49,8 +49,8 @@ test.describe('Losing Game Flow', () => {
 
     const correctAnswer = await extractCorrectAnswer(page);
 
-    // Initially no hints visible
-    const hintContainers = page.locator('.backdrop-blur-sm.rounded-lg');
+    // Initially no hints visible — hint cards use rounded-xl with border
+    const hintContainers = page.locator('.rounded-xl.border.border-white\\/10');
 
     // Make incorrect guesses and verify hints appear
     for (let i = 0; i < 4; i++) {

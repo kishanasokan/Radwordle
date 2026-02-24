@@ -20,9 +20,8 @@ test.describe('First-Time User Journey', () => {
 
   test('should show cookie consent banner on first visit', async ({ page }) => {
     // Cookie consent banner appears after a small delay
-    await expect(page.getByText('Data Storage Notice')).toBeVisible({ timeout: 3000 });
-    await expect(page.getByText('Radiordle stores your game progress')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible();
+    await expect(page.getByText('Radiordle uses local storage', { exact: false })).toBeVisible({ timeout: 3000 });
+    await expect(page.getByRole('button', { name: 'Got it' })).toBeVisible();
   });
 
   test('should dismiss cookie consent and save to localStorage', async ({ page }) => {
@@ -35,7 +34,7 @@ test.describe('First-Time User Journey', () => {
     expect(consent).toBe('accepted');
 
     // Verify banner is gone
-    await expect(page.getByText('Data Storage Notice')).not.toBeVisible();
+    await expect(page.getByText('Radiordle uses local storage', { exact: false })).not.toBeVisible();
   });
 
   test('should complete full game flow from start to win', async ({ page }) => {
@@ -46,15 +45,15 @@ test.describe('First-Time User Journey', () => {
     // Extract the correct answer from the page
     const correctAnswer = await extractCorrectAnswer(page);
 
-    // Verify initial state
-    await expect(page.getByText('Guesses: 0 / 5').first()).toBeVisible();
+    // Verify initial state (shows next guess number, 1-indexed)
+    await expect(page.getByText('Guess 1 / 5').first()).toBeVisible();
     await expect(page.getByText("What's the Diagnosis?").first()).toBeVisible();
 
     // Make an incorrect guess first
     await makeIncorrectGuess(page, SEARCH_TERMS[0], correctAnswer);
 
-    // Verify guess counter updated
-    await expect(page.getByText('Guesses: 1 / 5').first()).toBeVisible();
+    // Verify guess counter updated (now showing guess 2)
+    await expect(page.getByText('Guess 2 / 5').first()).toBeVisible();
 
     // Make the correct guess
     await submitGuess(page, correctAnswer);
@@ -82,7 +81,7 @@ test.describe('First-Time User Journey', () => {
 
     // Make a guess
     await makeIncorrectGuess(page, SEARCH_TERMS[0], correctAnswer);
-    await expect(page.getByText('Guesses: 1 / 5').first()).toBeVisible();
+    await expect(page.getByText('Guess 2 / 5').first()).toBeVisible();
 
     // Win the game
     await submitGuess(page, correctAnswer);
