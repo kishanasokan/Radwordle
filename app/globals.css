@@ -22,6 +22,19 @@
   }
 }
 
+/* Scale down for smaller laptop screens */
+/* Only applies below 1600px — larger screens are completely untouched */
+@media (min-width: 640px) and (max-width: 1199px) {
+  html {
+    zoom: 0.7;
+  }
+}
+@media (min-width: 1200px) and (max-width: 1599px) {
+  html {
+    zoom: 0.8;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
