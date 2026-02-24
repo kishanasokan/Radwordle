@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Condition, getGlobalStats, calculatePercentileBeat, GlobalStats } from '@/lib/supabase';
+import { Condition, getGlobalStats, calculatePercentileBeat, getPuzzleGuessDistribution, calculatePuzzlePercentile, GlobalStats } from '@/lib/supabase';
 import { getCookieConsent } from './CookieConsent';
 import DiagnosisAutocomplete from './DiagnosisAutocomplete';
 import { checkAnswer } from '@/lib/gameLogic';
@@ -397,6 +397,7 @@ export default function GameClient({
           citation={citation}
           learnLink={learnLink}
           dayNumber={dayNumber}
+          puzzleNumber={puzzleNumber}
           isArchive={isArchive}
           onClose={handleCloseModal}
           onCopied={() => showToast('copied')}
@@ -414,6 +415,7 @@ interface ResultsModalProps {
   citation?: string | null;
   learnLink?: string | null;
   dayNumber: number;
+  puzzleNumber: number;
   isArchive: boolean;
   onClose: () => void;
   onCopied: () => void;
@@ -427,6 +429,7 @@ function ResultsModal({
   citation,
   learnLink,
   dayNumber,
+  puzzleNumber,
   isArchive,
   onClose,
   onCopied,
@@ -435,19 +438,23 @@ function ResultsModal({
   const [globalStats, setGlobalStats] = useState<GlobalStats | null>(null);
   const [percentileBeat, setPercentileBeat] = useState<number | null>(null);
 
-  // Fetch global stats when modal opens
+  // Fetch puzzle-specific guess distribution and calculate percentile for this puzzle
   useEffect(() => {
+    // Fetch global stats for the summary row (win rate, avg guess, avg time)
     getGlobalStats().then((global) => {
       setGlobalStats(global);
-      if (global && stats.guessDistribution) {
-        const percentile = calculatePercentileBeat(
-          stats.guessDistribution,
-          global.guessDistribution
-        );
-        setPercentileBeat(percentile);
-      }
     });
-  }, [stats.guessDistribution]);
+
+    // Percentile: compare user's guess count on THIS puzzle vs this puzzle's distribution
+    if (isWon) {
+      getPuzzleGuessDistribution(puzzleNumber).then((dist) => {
+        if (dist) {
+          const percentile = calculatePuzzlePercentile(guessCount, dist);
+          setPercentileBeat(percentile);
+        }
+      });
+    }
+  }, [puzzleNumber, guessCount, isWon]);
 
   // Find the max value in guess distribution for scaling bars
   const maxDistribution = Math.max(
@@ -622,7 +629,7 @@ function ResultsModal({
           </div>
 
           {/* How You Compare — desktop only (hidden on mobile, shown after buttons there) */}
-          {stats.gamesWon > 0 && (
+          {isWon && (
             <div className="hidden sm:block bg-surface rounded-lg p-4">
               <h3 className="text-lg sm:text-xl font-bold text-white text-center mb-3">
                 How You Compare
@@ -633,11 +640,11 @@ function ResultsModal({
                     Top {100 - percentileBeat}%
                   </p>
                   <p className="text-sm text-gray-200 mt-1">
-                    You beat <span className="font-semibold">{percentileBeat}%</span> of players based on guess count
+                    You beat <span className="font-semibold">{percentileBeat}%</span> of players on this puzzle
                   </p>
                 </div>
               ) : globalStats === null ? (
-                <p className="text-center text-gray-300 text-sm">Loading global stats...</p>
+                <p className="text-center text-gray-300 text-sm">Loading stats...</p>
               ) : (
                 <p className="text-center text-gray-300 text-sm">Not enough data yet</p>
               )}
@@ -680,7 +687,7 @@ function ResultsModal({
         )}
 
         {/* How You Compare — mobile only (hidden on desktop, shown above in grid there) */}
-        {stats.gamesWon > 0 && (
+        {isWon && (
           <div className="sm:hidden bg-surface rounded-lg p-3 mb-4">
             <h3 className="text-lg font-bold text-white text-center mb-3">
               How You Compare
@@ -691,11 +698,11 @@ function ResultsModal({
                   Top {100 - percentileBeat}%
                 </p>
                 <p className="text-sm text-gray-200 mt-1">
-                  You beat <span className="font-semibold">{percentileBeat}%</span> of players based on guess count
+                  You beat <span className="font-semibold">{percentileBeat}%</span> of players on this puzzle
                 </p>
               </div>
             ) : globalStats === null ? (
-              <p className="text-center text-gray-300 text-sm">Loading global stats...</p>
+              <p className="text-center text-gray-300 text-sm">Loading stats...</p>
             ) : (
               <p className="text-center text-gray-300 text-sm">Not enough data yet</p>
             )}

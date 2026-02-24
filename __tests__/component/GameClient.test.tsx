@@ -31,6 +31,7 @@ vi.mock('@/lib/localStorage', () => ({
 
 const mockSubmitGameResult = vi.fn()
 const mockGetGlobalStats = vi.fn()
+const mockGetPuzzleGuessDistribution = vi.fn()
 
 vi.mock('@/lib/supabase', async (importOriginal) => {
   const original = await importOriginal<typeof import('@/lib/supabase')>()
@@ -38,6 +39,7 @@ vi.mock('@/lib/supabase', async (importOriginal) => {
     ...original,
     submitGameResult: (...args: unknown[]) => mockSubmitGameResult(...args),
     getGlobalStats: () => mockGetGlobalStats(),
+    getPuzzleGuessDistribution: (...args: unknown[]) => mockGetPuzzleGuessDistribution(...args),
   }
 })
 
@@ -78,6 +80,7 @@ beforeEach(() => {
   })
   mockSubmitGameResult.mockResolvedValue({ isFirstSolver: false })
   mockGetGlobalStats.mockResolvedValue(null)
+  mockGetPuzzleGuessDistribution.mockResolvedValue(null)
 })
 
 describe('GameClient', () => {
