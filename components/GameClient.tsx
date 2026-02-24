@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Condition, getGlobalStats, calculatePercentileBeat, GlobalStats } from '@/lib/supabase';
+import { getCookieConsent } from './CookieConsent';
 import DiagnosisAutocomplete from './DiagnosisAutocomplete';
 import { checkAnswer } from '@/lib/gameLogic';
 import { MAX_GUESSES } from '@/lib/gameLogic';
@@ -43,19 +44,19 @@ interface GameClientProps {
 const TOAST_CONFIG: Record<Exclude<ToastType, null>, ToastConfig> = {
   correct: {
     message: 'Correct!',
-    bgColor: 'bg-green-500',
+    bgColor: 'bg-success',
     textColor: 'text-white',
     icon: '✓',
   },
   partial: {
     message: "Close! You're on the right track",
-    bgColor: 'bg-yellow-500',
+    bgColor: 'bg-warning',
     textColor: 'text-black',
     icon: '◐',
   },
   incorrect: {
     message: 'Not quite - try again',
-    bgColor: 'bg-red-500',
+    bgColor: 'bg-error',
     textColor: 'text-white',
     icon: '✗',
   },
@@ -78,7 +79,6 @@ export default function GameClient({
   onGameStateChange,
   onTypingStateChange,
 }: GameClientProps) {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   // Lazy initialize game state from localStorage
   const [gameState, setGameState] = useState<GameState | null>(() => {
     const savedState = getGameState(dayNumber);
@@ -99,6 +99,25 @@ export default function GameClient({
   const [showModal, setShowModal] = useState(() => gameState?.isComplete || false);
   const [toast, setToast] = useState<ToastType>(null);
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [consentGiven, setConsentGiven] = useState(() => getCookieConsent() === 'accepted');
+
+  // Re-check consent when the cookie banner is dismissed (storage event or periodic check)
+  // Fallback: auto-enable after 5s in case the consent banner fails to render
+  useEffect(() => {
+    if (consentGiven) return;
+    const interval = setInterval(() => {
+      if (getCookieConsent() === 'accepted') {
+        setConsentGiven(true);
+      }
+    }, 500);
+    const fallbackTimeout = setTimeout(() => {
+      setConsentGiven(true);
+    }, 5000);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(fallbackTimeout);
+    };
+  }, [consentGiven]);
   const guessStartTime = useRef<number>(0);
   const gameStartTime = useRef<number>(0);
   const playerHashRef = useRef<string | null>(null);
@@ -246,7 +265,6 @@ export default function GameClient({
   );
 
   const handleDropdownStateChange = useCallback((isOpen: boolean) => {
-    setIsDropdownOpen(isOpen);
     onTypingStateChange?.(isOpen);
   }, [onTypingStateChange]);
 
@@ -274,7 +292,7 @@ export default function GameClient({
       )}
 
       {/* Desktop layout - normal flow */}
-      <div className={`hidden sm:block w-full transition-all duration-300 ${isDropdownOpen ? 'pb-[200px]' : ''}`}>
+      <div className="hidden sm:block w-full pb-[220px]">
         {gameState.isComplete ? (
           <div className="text-center text-white text-xl font-baloo-2">
             {gameState.isWon ? (
@@ -290,7 +308,7 @@ export default function GameClient({
             )}
             <button
               onClick={() => setShowModal(true)}
-              className="mt-4 px-6 py-2 bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] hover:from-[#f59e0b] hover:to-[#f59e0b] text-black font-bold font-baloo-2 rounded-lg transition-all shadow-lg"
+              className="mt-4 px-6 py-2 bg-gradient-to-r from-accent to-accent-light hover:from-accent hover:to-accent text-black font-bold font-baloo-2 rounded-lg transition-all shadow-lg"
             >
               View Results
             </button>
@@ -307,6 +325,7 @@ export default function GameClient({
               onSubmit={handleSubmit}
               onDropdownStateChange={handleDropdownStateChange}
               previousGuesses={gameState.guesses}
+              disabled={!consentGiven}
             />
           </>
         )}
@@ -329,7 +348,7 @@ export default function GameClient({
             )}
             <button
               onClick={() => setShowModal(true)}
-              className="mt-4 px-6 py-2 bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] hover:from-[#f59e0b] hover:to-[#f59e0b] text-black font-bold font-baloo-2 rounded-lg transition-all shadow-lg"
+              className="mt-4 px-6 py-2 bg-gradient-to-r from-accent to-accent-light hover:from-accent hover:to-accent text-black font-bold font-baloo-2 rounded-lg transition-all shadow-lg"
             >
               View Results
             </button>
@@ -343,13 +362,14 @@ export default function GameClient({
               </p>
             </div>
             {/* Input sticky at bottom on mobile - positions directly above keyboard */}
-            <div className="fixed bottom-0 left-0 right-0 px-4 pb-[env(safe-area-inset-bottom,0px)] bg-gradient-to-t from-[#0f1c2e] via-[#0f1c2e]/80 to-transparent pt-4 z-40">
+            <div className="fixed bottom-0 left-0 right-0 px-4 pb-[env(safe-area-inset-bottom,0px)] bg-gradient-to-t from-page-bg-dark via-page-bg-dark/80 to-transparent pt-4 z-40">
               <DiagnosisAutocomplete
                 conditions={conditions}
                 onSubmit={handleSubmit}
                 onDropdownStateChange={handleDropdownStateChange}
                 previousGuesses={gameState.guesses}
                 isMobile={true}
+                disabled={!consentGiven}
               />
             </div>
             {/* Spacer to prevent content from being hidden behind fixed input */}
@@ -490,11 +510,11 @@ function ResultsModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4 animate-backdrop-fade"
       onClick={onClose}
     >
       <div
-        className="bg-gradient-to-b from-[#1e3a5f] to-[#0f1c2e] rounded-lg p-4 sm:p-8 max-w-md sm:max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto font-baloo-2"
+        className="bg-gradient-to-b from-modal-bg to-page-bg-dark rounded-lg p-4 sm:p-8 max-w-md sm:max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto font-baloo-2 animate-modal-enter"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-2 sm:mb-4">
@@ -514,14 +534,14 @@ function ResultsModal({
               <p className="text-base sm:text-lg mt-1 font-light">
                 The correct answer was:
               </p>
-              <p className="text-lg sm:text-xl font-bold text-[#f59e0b]">{correctAnswer}</p>
+              <p className="text-lg sm:text-xl font-bold text-accent">{correctAnswer}</p>
             </>
           ) : (
             <>
               <p className="text-base sm:text-lg font-light">
                 The correct answer was:
               </p>
-              <p className="text-lg sm:text-xl font-bold text-[#f59e0b]">{correctAnswer}</p>
+              <p className="text-lg sm:text-xl font-bold text-accent">{correctAnswer}</p>
             </>
           )}
           {citation && (
@@ -536,11 +556,11 @@ function ResultsModal({
           <h3 className="text-xl sm:text-2xl font-bold text-black text-center mb-2">Statistics</h3>
           <div className="grid grid-cols-4 gap-2 sm:gap-3 text-center">
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-[#407763] leading-tight">{stats.gamesPlayed}</p>
+              <p className="text-xl sm:text-2xl font-bold text-success leading-tight">{stats.gamesPlayed}</p>
               <p className="text-xs text-gray-600">Played</p>
             </div>
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-[#407763] leading-tight">
+              <p className="text-xl sm:text-2xl font-bold text-success leading-tight">
                 {stats.gamesPlayed > 0
                   ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100)
                   : 0}
@@ -548,11 +568,11 @@ function ResultsModal({
               <p className="text-xs text-gray-600">Win %</p>
             </div>
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-[#407763] leading-tight">{stats.currentStreak}</p>
+              <p className="text-xl sm:text-2xl font-bold text-success leading-tight">{stats.currentStreak}</p>
               <p className="text-xs text-gray-600">Streak</p>
             </div>
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-[#407763] leading-tight">{stats.maxStreak}</p>
+              <p className="text-xl sm:text-2xl font-bold text-success leading-tight">{stats.maxStreak}</p>
               <p className="text-xs text-gray-600">Max Streak</p>
             </div>
           </div>
@@ -570,15 +590,15 @@ function ResultsModal({
                 const count = stats.guessDistribution[guessNum] || 0;
                 const percentage = maxDistribution > 0 ? (count / maxDistribution) * 100 : 0;
                 const isCurrentGuess = isWon && guessNum === guessCount;
-                const barColor = count > 0 ? (isCurrentGuess ? 'bg-[#407763]' : 'bg-gray-400') : 'bg-gray-100';
+                const barColor = count > 0 ? (isCurrentGuess ? 'bg-success' : 'bg-gray-400') : 'bg-gray-100';
 
                 return (
                   <div key={guessNum} className="flex items-center gap-2">
                     <span className="w-4 text-sm font-medium text-gray-600">{guessNum}</span>
                     <div className="flex-1 h-5 sm:h-6 bg-gray-200 rounded overflow-hidden">
                       <div
-                        className={`h-full ${barColor} rounded flex items-center justify-end px-2 transition-all duration-300`}
-                        style={{ width: `${Math.max(percentage, count > 0 ? 8 : 0)}%` }}
+                        className={`h-full ${barColor} rounded flex items-center justify-end px-2 animate-bar-fill`}
+                        style={{ width: `${Math.max(percentage, count > 0 ? 8 : 0)}%`, animationDelay: `${(guessNum - 1) * 0.08}s` }}
                       >
                         {count > 0 && (
                           <span className="text-white text-sm font-bold">{count}</span>
@@ -593,7 +613,7 @@ function ResultsModal({
 
           {/* How You Compare — desktop only (hidden on mobile, shown after buttons there) */}
           {stats.gamesWon > 0 && (
-            <div className="hidden sm:block bg-[#3d4d68] rounded-lg p-4">
+            <div className="hidden sm:block bg-surface rounded-lg p-4">
               <h3 className="text-lg sm:text-xl font-bold text-white text-center mb-3">
                 How You Compare
               </h3>
@@ -632,7 +652,7 @@ function ResultsModal({
         {/* Share Button */}
         <button
           onClick={handleShare}
-          className={`w-full px-6 py-3 bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] hover:from-[#f59e0b] hover:to-[#f59e0b] text-black font-bold text-lg rounded-lg transition-all shadow-lg ${learnLink ? 'mb-3' : 'mb-4'}`}
+          className={`w-full px-6 py-3 bg-gradient-to-r from-accent to-accent-light hover:from-accent hover:to-accent text-black font-bold text-lg rounded-lg transition-all shadow-lg ${learnLink ? 'mb-3' : 'mb-4'}`}
         >
           Share Results
         </button>
@@ -651,7 +671,7 @@ function ResultsModal({
 
         {/* How You Compare — mobile only (hidden on desktop, shown above in grid there) */}
         {stats.gamesWon > 0 && (
-          <div className="sm:hidden bg-[#3d4d68] rounded-lg p-3 mb-4">
+          <div className="sm:hidden bg-surface rounded-lg p-3 mb-4">
             <h3 className="text-lg font-bold text-white text-center mb-3">
               How You Compare
             </h3>

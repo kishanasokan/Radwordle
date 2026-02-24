@@ -9,6 +9,7 @@ interface DiagnosisAutocompleteProps {
   onDropdownStateChange: (isOpen: boolean) => void;
   previousGuesses?: string[];
   isMobile?: boolean;
+  disabled?: boolean;
 }
 
 export default function DiagnosisAutocomplete({
@@ -16,7 +17,8 @@ export default function DiagnosisAutocomplete({
   onSubmit,
   onDropdownStateChange,
   previousGuesses = [],
-  isMobile = false
+  isMobile = false,
+  disabled = false
 }: DiagnosisAutocompleteProps) {
   const [inputValue, setInputValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -220,7 +222,8 @@ export default function DiagnosisAutocomplete({
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Diagnosis..."
+            disabled={disabled}
+            placeholder={disabled ? "Accept notice to play" : "Diagnosis..."}
             aria-invalid={!!validationError}
             aria-describedby={validationError ? "diagnosis-error" : undefined}
             className={`w-full px-3 sm:px-6 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-baloo-2 bg-white bg-opacity-90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 ${
@@ -282,7 +285,12 @@ export default function DiagnosisAutocomplete({
 
         <button
           onClick={handleSubmit}
-          className="px-4 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] hover:from-[#f59e0b] hover:to-[#f59e0b] text-black font-bold font-baloo-2 text-base sm:text-lg rounded-lg transition-all shadow-lg"
+          disabled={disabled}
+          className={`px-4 sm:px-8 py-3 sm:py-4 font-bold font-baloo-2 text-base sm:text-lg rounded-lg transition-all shadow-lg ${
+            disabled
+              ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
+              : 'bg-gradient-to-r from-accent to-accent-light hover:from-accent hover:to-accent text-black'
+          }`}
         >
           Submit
         </button>

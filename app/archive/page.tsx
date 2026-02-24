@@ -6,7 +6,7 @@ export default function ArchivePage() {
   return (
     <div className="min-h-screen relative overflow-y-auto overflow-x-hidden">
       {/* Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1a2e5a] via-[#233b6e] to-[#1a2e5a]">
+      <div className="absolute inset-0 bg-gradient-to-br from-page-bg via-page-bg-mid to-page-bg">
         {/* Radial Vignette */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -24,7 +24,7 @@ export default function ArchivePage() {
           {/* Back Button */}
           <Link
             href="/"
-            className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors flex-shrink-0"
+            className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors flex-shrink-0"
           >
             <span className="text-xl sm:text-2xl">←</span>
           </Link>

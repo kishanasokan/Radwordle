@@ -61,11 +61,11 @@ export default function StatsModal({ isOpen, onClose, stats }: StatsModalProps) 
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[100] p-4"
+      className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[100] p-4 animate-backdrop-fade"
       onClick={onClose}
     >
       <div
-        className="bg-gradient-to-b from-[#1e3a5f] to-[#0f1c2e] rounded-lg p-4 sm:p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto font-baloo-2"
+        className="bg-gradient-to-b from-modal-bg to-page-bg-dark rounded-lg p-4 sm:p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto font-baloo-2 animate-modal-enter"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Title */}
@@ -78,19 +78,19 @@ export default function StatsModal({ isOpen, onClose, stats }: StatsModalProps) 
           <h3 className="text-xl sm:text-2xl font-bold text-black text-center mb-2">Statistics</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-center">
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-[#407763] leading-tight">{stats.gamesPlayed}</p>
+              <p className="text-xl sm:text-2xl font-bold text-success leading-tight">{stats.gamesPlayed}</p>
               <p className="text-xs text-gray-600">Played</p>
             </div>
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-[#407763] leading-tight">{winRate}</p>
+              <p className="text-xl sm:text-2xl font-bold text-success leading-tight">{winRate}</p>
               <p className="text-xs text-gray-600">Win %</p>
             </div>
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-[#407763] leading-tight">{stats.currentStreak}</p>
+              <p className="text-xl sm:text-2xl font-bold text-success leading-tight">{stats.currentStreak}</p>
               <p className="text-xs text-gray-600">Current Streak</p>
             </div>
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-[#407763] leading-tight">{stats.maxStreak}</p>
+              <p className="text-xl sm:text-2xl font-bold text-success leading-tight">{stats.maxStreak}</p>
               <p className="text-xs text-gray-600">Max Streak</p>
             </div>
           </div>
@@ -112,8 +112,8 @@ export default function StatsModal({ isOpen, onClose, stats }: StatsModalProps) 
                   <span className="w-4 text-sm font-medium text-gray-600">{guessNum}</span>
                   <div className="flex-1 h-6 bg-gray-200 rounded overflow-hidden">
                     <div
-                      className={`h-full ${barColor} rounded flex items-center justify-end px-2 transition-all duration-300`}
-                      style={{ width: `${Math.max(percentage, count > 0 ? 8 : 0)}%` }}
+                      className={`h-full ${barColor} rounded flex items-center justify-end px-2 animate-bar-fill`}
+                      style={{ width: `${Math.max(percentage, count > 0 ? 8 : 0)}%`, animationDelay: `${(guessNum - 1) * 0.08}s` }}
                     >
                       {count > 0 && (
                         <span className="text-white text-sm font-bold">{count}</span>

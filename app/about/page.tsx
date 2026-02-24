@@ -12,7 +12,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen relative overflow-y-auto overflow-x-hidden">
       {/* Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1a2e5a] via-[#233b6e] to-[#1a2e5a]">
+      <div className="absolute inset-0 bg-gradient-to-br from-page-bg via-page-bg-mid to-page-bg">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -27,7 +27,7 @@ export default function AboutPage() {
         <div className="flex justify-between items-center p-4 sm:p-6">
           <Link
             href="/"
-            className="flex items-center gap-2 px-4 py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors"
           >
             <span className="text-xl">←</span>
             <span className="font-bold font-baloo-2">Back to Game</span>
@@ -140,7 +140,7 @@ export default function AboutPage() {
                   </a>
                   <Link
                     href="/"
-                    className="flex items-center justify-center gap-2 px-6 py-3 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors font-bold"
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors font-bold"
                   >
                     <span>💬</span>
                     Send Feedback
@@ -178,7 +178,7 @@ export default function AboutPage() {
         </div>
 
         {/* Footer */}
-        <footer className="relative bg-gradient-to-r from-[#0f1c2e] via-[#1a2744] to-[#0f1c2e] border-t border-white border-opacity-5">
+        <footer className="relative bg-gradient-to-r from-page-bg-dark via-footer-bg to-page-bg-dark border-t border-white border-opacity-5">
           <div className="max-w-6xl mx-auto px-6 py-4">
             <p className="text-white text-center text-xs font-baloo-2 opacity-70">
               © {new Date().getFullYear()} Radiordle. For educational and entertainment purposes only.

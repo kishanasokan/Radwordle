@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Puzzle, Hint, Condition } from '@/lib/supabase';
@@ -37,10 +37,29 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
     });
   }, [gameState?.isComplete]);
 
+  // Track initial hint count so only newly revealed hints animate (not restored from save)
+  const initialHintCount = useRef<number | null>(null);
+
   const handleGameStateChange = useCallback((state: GameState) => {
     setGameState(state);
   }, []);
 
+  // Capture the hint count on first game state load
+  useEffect(() => {
+    if (gameState && initialHintCount.current === null) {
+      initialHintCount.current = gameState.revealedHints;
+    }
+  }, [gameState]);
+
+  // Track whether the image border has appeared (for pulse animation)
+  const hasImageBorder = !!(gameState?.guessResults[0]);
+  const prevHadBorder = useRef(false);
+  const showImagePulse = hasImageBorder && !prevHadBorder.current;
+  useEffect(() => {
+    if (hasImageBorder) {
+      prevHadBorder.current = true;
+    }
+  }, [hasImageBorder]);
 
   // Determine which hints to show based on game state
   // Show all hints when game is complete, otherwise only show revealed hints
@@ -53,11 +72,11 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
   const firstGuessResult = gameState?.guessResults[0];
   let imageBorderStyle = '';
   if (firstGuessResult === 'correct') {
-    imageBorderStyle = 'ring-4 ring-[#407763] shadow-[0_0_20px_rgba(64,119,99,0.6)]';
+    imageBorderStyle = 'ring-4 ring-success shadow-[0_0_20px_rgba(64,119,99,0.6)]';
   } else if (firstGuessResult === 'partial') {
-    imageBorderStyle = 'ring-4 ring-[#f6d656] shadow-[0_0_20px_rgba(246,214,86,0.6)]';
+    imageBorderStyle = 'ring-4 ring-warning shadow-[0_0_20px_rgba(246,214,86,0.6)]';
   } else if (firstGuessResult === 'incorrect') {
-    imageBorderStyle = 'ring-4 ring-[#9e4a4a] shadow-[0_0_20px_rgba(158,74,74,0.6)]';
+    imageBorderStyle = 'ring-4 ring-error shadow-[0_0_20px_rgba(158,74,74,0.6)]';
   }
 
   // Annotated image: show after first guess if a valid URL is provided
@@ -68,8 +87,8 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
 
   return (
     <div className="min-h-screen-safe relative overflow-y-auto overflow-x-hidden" style={{ minHeight: 'var(--full-vh)' }}>
-      {/* Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1a2e5a] via-[#233b6e] to-[#1a2e5a]">
+      {/* Gradient Background - fixed on desktop so it doesn't scroll with content */}
+      <div className="absolute sm:fixed inset-0 bg-gradient-to-br from-page-bg via-page-bg-mid to-page-bg pointer-events-none">
         {/* Background decorative medical images - horizontal on desktop, vertical on mobile */}
         {/* Desktop layout - horizontal */}
         <div className="hidden sm:flex absolute inset-0 opacity-20 items-end justify-center pb-8">
@@ -110,7 +129,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
             <div className="sm:flex-1 sm:flex sm:justify-start">
               <Link
                 href="/archive"
-                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors"
               >
                 <span className="text-base sm:text-xl">📁</span>
                 <span className="font-bold font-baloo-2 text-xs sm:text-base">Archives</span>
@@ -136,9 +155,19 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
             {/* Stats and Feedback Buttons - Right side container with fixed width on desktop */}
             <div className="sm:flex-1 sm:flex sm:justify-end">
               <div className="flex items-center gap-1 sm:gap-2">
+                <Link
+                  href="/about"
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 min-h-[36px] sm:min-h-[40px] bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors"
+                  title="Learn More"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 sm:w-5 sm:h-5">
+                    <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
+                  </svg>
+                  <span className="hidden sm:inline font-bold font-baloo-2 text-xs sm:text-base">About</span>
+                </Link>
                 <button
                   onClick={() => setShowFeedback(true)}
-                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors"
                   title="Send Feedback"
                 >
                   <span className="text-base sm:text-xl">💬</span>
@@ -146,7 +175,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
                 </button>
                 <button
                   onClick={() => setShowStats(true)}
-                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors"
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors"
                 >
                   <span className="text-base sm:text-xl">📊</span>
                   <span className="font-bold font-baloo-2 text-xs sm:text-base">Stats</span>
@@ -176,8 +205,8 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
         <div className="flex-1 flex flex-col items-center justify-start sm:justify-start px-4 pb-4 sm:pb-4 sm:pt-10">
 
           {/* Medical Image Display */}
-          <div className="w-full max-w-3xl mb-3 sm:mb-3">
-            <div className={`relative w-full aspect-[16/9] bg-black rounded-lg overflow-hidden shadow-2xl transition-all duration-300 ${imageBorderStyle}`}>
+          <div className="w-full max-w-3xl lg:max-w-4xl mb-3 sm:mb-6">
+            <div className={`relative w-full aspect-[16/9] bg-black rounded-lg overflow-hidden shadow-2xl transition-all duration-300 ${imageBorderStyle}${showImagePulse ? ' animate-image-pulse' : ''}`}>
               {puzzle.image_url ? (
                 <Image
                   src={puzzle.image_url}
@@ -208,13 +237,13 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
           </div>
 
           {/* Question */}
-          <h2 className="text-2xl sm:text-3xl md:text-[2.025rem] text-white font-bold font-baloo-2 mb-1 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
+          <h2 className="text-2xl sm:text-3xl md:text-[2.025rem] text-white font-bold font-baloo-2 mb-1 sm:mb-3 sm:mt-2 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
             What&apos;s the Diagnosis?
           </h2>
 
           {/* Hints Display - only show revealed hints */}
           {visibleHints.length > 0 && (
-            <div className="w-full max-w-xl mx-auto space-y-3 mb-4">
+            <div className="w-full max-w-xl mx-auto space-y-3 mb-4 sm:mb-6">
               {visibleHints.map((hint, index) => {
                 // Hints are revealed after a guess. The guess that revealed this hint is at index.
                 // To color the hint based on the NEXT guess after it was revealed, we look at index + 1.
@@ -227,26 +256,29 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
 
                 if (nextGuessResult === 'correct') {
                   // Green for correct guess
-                  hintStyle = 'bg-[#407763]';
+                  hintStyle = 'bg-success';
                   textColor = 'text-white';
                 } else if (nextGuessResult === 'partial') {
                   // Yellow for partial match
-                  hintStyle = 'bg-[#f6d656]';
+                  hintStyle = 'bg-warning';
                   textColor = 'text-black';
                 } else if (nextGuessResult === 'incorrect') {
                   // Red for incorrect guess
-                  hintStyle = 'bg-[#9e4a4a]';
+                  hintStyle = 'bg-error';
                   textColor = 'text-white';
                 } else {
                   // Default blue if no next guess yet
-                  hintStyle = 'bg-[#6b89b8] bg-opacity-60';
+                  hintStyle = 'bg-hint-default bg-opacity-60';
                   textColor = 'text-white';
                 }
+
+                // Only animate hints that were revealed after the initial load
+                const isNewHint = initialHintCount.current !== null && index >= initialHintCount.current;
 
                 return (
                   <div
                     key={hint.id}
-                    className={`${hintStyle} ${textColor} backdrop-blur-sm rounded-lg px-6 py-4 transition-all duration-300`}
+                    className={`${hintStyle} ${textColor} backdrop-blur-sm rounded-lg px-6 py-4 transition-all duration-300${isNewHint ? ' animate-hint-reveal' : ''}`}
                   >
                     {hint.hint_text ? (
                       <p className="text-lg">{hint.hint_text}</p>
