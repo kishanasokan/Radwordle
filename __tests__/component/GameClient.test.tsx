@@ -31,6 +31,7 @@ vi.mock('@/lib/localStorage', () => ({
 
 const mockSubmitGameResult = vi.fn()
 const mockGetGlobalStats = vi.fn()
+const mockGetPuzzleGuessDistribution = vi.fn()
 
 vi.mock('@/lib/supabase', async (importOriginal) => {
   const original = await importOriginal<typeof import('@/lib/supabase')>()
@@ -38,6 +39,7 @@ vi.mock('@/lib/supabase', async (importOriginal) => {
     ...original,
     submitGameResult: (...args: unknown[]) => mockSubmitGameResult(...args),
     getGlobalStats: () => mockGetGlobalStats(),
+    getPuzzleGuessDistribution: (...args: unknown[]) => mockGetPuzzleGuessDistribution(...args),
   }
 })
 
@@ -68,6 +70,8 @@ function getInput() {
 beforeEach(() => {
   vi.clearAllMocks()
   localStorage.clear()
+  // Set cookie consent so the input is enabled with "Diagnosis..." placeholder
+  localStorage.setItem('radiordle_cookie_consent', 'accepted')
   mockGetGameState.mockReturnValue(null)
   mockGetStatistics.mockReturnValue({
     gamesPlayed: 0,
@@ -78,6 +82,7 @@ beforeEach(() => {
   })
   mockSubmitGameResult.mockResolvedValue({ isFirstSolver: false })
   mockGetGlobalStats.mockResolvedValue(null)
+  mockGetPuzzleGuessDistribution.mockResolvedValue(null)
 })
 
 describe('GameClient', () => {
@@ -139,8 +144,8 @@ describe('GameClient', () => {
     it('shows guess counter when game is in progress', () => {
       render(<GameClient {...defaultProps} />)
 
-      // Desktop + mobile both render counter
-      const counters = screen.getAllByText(/Guesses: 0 \/ 5/)
+      // Desktop + mobile both render counter (shows next guess number, 1-indexed)
+      const counters = screen.getAllByText(/Guess 1 \/ 5/)
       expect(counters.length).toBeGreaterThan(0)
     })
   })

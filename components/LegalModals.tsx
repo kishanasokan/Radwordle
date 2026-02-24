@@ -12,14 +12,14 @@ export default function LegalModals() {
       <section className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
         <button
           onClick={() => setShowPrivacyPolicy(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors font-bold font-baloo-2"
+          className="flex items-center gap-2 px-6 py-3 bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors font-bold font-baloo-2"
         >
           <span>🔒</span>
           Privacy Policy
         </button>
         <button
           onClick={() => setShowTermsOfService(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-[#3d4d68] hover:bg-[#4a5b7a] text-white rounded-lg transition-colors font-bold font-baloo-2"
+          className="flex items-center gap-2 px-6 py-3 bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors font-bold font-baloo-2"
         >
           <span>📜</span>
           Terms of Service
@@ -29,7 +29,7 @@ export default function LegalModals() {
       {/* Privacy Policy Modal */}
       {showPrivacyPolicy && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-          <div className="bg-[#1a2e5a] rounded-xl w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl border border-white/10">
+          <div className="bg-page-bg rounded-xl w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl border border-white/10">
             <div className="flex justify-between items-center p-4 sm:p-6 border-b border-white/10">
               <h2 className="text-xl sm:text-2xl text-white font-baloo-2 font-bold">Privacy Policy</h2>
               <button
@@ -111,7 +111,7 @@ export default function LegalModals() {
       {/* Terms of Service Modal */}
       {showTermsOfService && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-          <div className="bg-[#1a2e5a] rounded-xl w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl border border-white/10">
+          <div className="bg-page-bg rounded-xl w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl border border-white/10">
             <div className="flex justify-between items-center p-4 sm:p-6 border-b border-white/10">
               <h2 className="text-xl sm:text-2xl text-white font-baloo-2 font-bold">Terms of Service</h2>
               <button

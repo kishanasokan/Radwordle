@@ -467,3 +467,58 @@ export function calculatePercentileBeat(
   // Percentage of players the user beat
   return Math.round((worseThanUser / globalTotalWins) * 100);
 }
+
+/**
+ * Fetches the guess distribution for a specific puzzle from the database.
+ */
+export async function getPuzzleGuessDistribution(
+  puzzleNumber: number
+): Promise<{ [key: number]: number } | null> {
+  try {
+    const { data, error } = await supabase
+      .from('game_stats_guess_distribution_by_puzzle')
+      .select('guess_count, wins')
+      .eq('puzzle_number', puzzleNumber);
+
+    if (error) {
+      console.error('Error fetching puzzle guess distribution:', error);
+      return null;
+    }
+
+    const distribution: { [key: number]: number } = {};
+    data?.forEach((row: { guess_count: number; wins: number }) => {
+      distribution[row.guess_count] = row.wins;
+    });
+
+    return distribution;
+  } catch (error) {
+    console.error('Error fetching puzzle guess distribution:', error);
+    return null;
+  }
+}
+
+/**
+ * Calculates what percentage of players you beat on a specific puzzle,
+ * based on your actual guess count vs the puzzle's global distribution.
+ */
+export function calculatePuzzlePercentile(
+  userGuessCount: number,
+  puzzleGuessDistribution: { [key: number]: number }
+): number | null {
+  let totalWins = 0;
+  for (const count of Object.values(puzzleGuessDistribution)) {
+    totalWins += count;
+  }
+
+  if (totalWins === 0) return null;
+
+  // Count players who took MORE guesses than the user on this puzzle
+  let worseThanUser = 0;
+  for (const [guess, count] of Object.entries(puzzleGuessDistribution)) {
+    if (Number(guess) > userGuessCount) {
+      worseThanUser += count;
+    }
+  }
+
+  return Math.round((worseThanUser / totalWins) * 100);
+}

@@ -12,11 +12,11 @@ interface ArchiveDay {
 }
 
 export default function ArchiveBrowser() {
+  const today = getDayNumber();
+
   const days = useMemo(() => {
-    const today = getDayNumber();
     const archiveDays: ArchiveDay[] = [];
 
-    // Generate list of all days from 0 to today
     for (let i = today; i >= 0; i--) {
       const date = dayNumberToDate(i);
       archiveDays.push({
@@ -24,63 +24,58 @@ export default function ArchiveBrowser() {
         date: date.toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
-          year: 'numeric',
         }),
         status: getDayStatus(i),
       });
     }
 
     return archiveDays;
-  }, []);
-
-  const getStatusBadge = (status: 'won' | 'lost' | 'not_played') => {
-    switch (status) {
-      case 'won':
-        return (
-          <span className="px-2 py-1 bg-green-600 text-white text-xs font-bold rounded">
-            WON
-          </span>
-        );
-      case 'lost':
-        return (
-          <span className="px-2 py-1 bg-red-600 text-white text-xs font-bold rounded">
-            LOST
-          </span>
-        );
-      default:
-        return (
-          <span className="px-2 py-1 bg-gray-600 text-white text-xs font-bold rounded">
-            PLAY
-          </span>
-        );
-    }
-  };
-
-  const today = getDayNumber();
+  }, [today]);
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <div className="space-y-2">
-        {days.map((day) => (
-          <Link
-            key={day.dayNumber}
-            href={day.dayNumber === today ? '/' : `/archive/${day.dayNumber}`}
-            className="flex items-center justify-between p-4 bg-[#3d4d68] hover:bg-[#4a5b7a] rounded-lg transition-colors"
-          >
-            <div className="flex items-center gap-4">
-              <div className="text-white">
-                <span className="font-bold text-lg">Day {day.dayNumber + 1}</span>
-                {day.dayNumber === today && (
-                  <span className="ml-2 px-2 py-0.5 bg-yellow-500 text-black text-xs font-bold rounded">
-                    TODAY
-                  </span>
+      <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-3">
+        {days.map((day) => {
+          const isToday = day.dayNumber === today;
+          const isWon = day.status === 'won';
+          const isLost = day.status === 'lost';
+
+          return (
+            <Link
+              key={day.dayNumber}
+              href={isToday ? '/' : `/archive/${day.dayNumber}`}
+              className={`relative flex flex-col items-center justify-center rounded-lg p-2.5 sm:p-3 transition-all duration-150 ${
+                isWon
+                  ? 'bg-success/80 hover:bg-success ring-1 ring-success/50'
+                  : isLost
+                    ? 'bg-error/60 hover:bg-error/80 ring-1 ring-error/40'
+                    : 'bg-surface hover:bg-surface-hover ring-1 ring-white/5'
+              }`}
+            >
+              {isToday && (
+                <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 bg-warning text-black text-[9px] font-bold font-baloo-2 rounded leading-none">
+                  TODAY
+                </span>
+              )}
+              <span className="text-white font-bold font-baloo-2 text-sm sm:text-base leading-tight inline-flex items-center gap-1">
+                Day {day.dayNumber + 1}
+                {isWon && (
+                  <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
                 )}
-              </div>
-              <div className="text-gray-300 text-sm">{day.date}</div>
-            </div>
-            {getStatusBadge(day.status)}
-          </Link>
-        ))}
+                {isLost && (
+                  <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                )}
+              </span>
+              <span className="text-white/50 text-[10px] sm:text-xs leading-tight mt-0.5">
+                {day.date}
+              </span>
+            </Link>
+          );
+        })}
       </div>
 
       {days.length === 0 && (

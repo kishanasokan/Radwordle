@@ -3,16 +3,42 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Semantic color tokens */
+  --color-surface: #3d4d68;
+  --color-surface-hover: #4a5b7a;
+  --color-success: #407763;
+  --color-warning: #f6d656;
+  --color-error: #9e4a4a;
+  --color-hint-default: #6b89b8;
+  --color-accent: #f59e0b;
+  --color-accent-light: #fbbf24;
+  --color-page-bg: #1a2e5a;
+  --color-page-bg-mid: #233b6e;
+  --color-page-bg-dark: #0f172a;
+  --color-modal-bg: #1e3a5f;
+  --color-footer-bg: #1a2744;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--color-surface);
+  --color-surface-hover: var(--color-surface-hover);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+  --color-hint-default: var(--color-hint-default);
+  --color-accent: var(--color-accent);
+  --color-accent-light: var(--color-accent-light);
+  --color-page-bg: var(--color-page-bg);
+  --color-page-bg-mid: var(--color-page-bg-mid);
+  --color-page-bg-dark: var(--color-page-bg-dark);
+  --color-modal-bg: var(--color-modal-bg);
+  --color-footer-bg: var(--color-footer-bg);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-fredoka: var(--font-fredoka);
   --font-baloo-2: var(--font-baloo-2);
-  --font-poppins: var(--font-poppins);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -59,7 +85,7 @@
 }
 
 html {
-  background: #0f172a;
+  background: var(--color-page-bg-dark);
 }
 
 body {
@@ -135,4 +161,78 @@ body {
 
 .animate-slide-down {
   animation: slide-down 0.3s ease-out forwards;
+}
+
+/* Hint reveal animation — fade-in + slight upward slide */
+@keyframes hint-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-hint-reveal {
+  animation: hint-reveal 0.3s ease-out forwards;
+}
+
+/* Image border pulse — brief scale bump when border first appears */
+@keyframes image-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.01);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-image-pulse {
+  animation: image-pulse 0.3s ease-in-out;
+}
+
+/* Modal entrance — scale-up from 95% + fade-in */
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-modal-enter {
+  animation: modal-enter 0.2s ease-out forwards;
+}
+
+/* Modal backdrop fade-in */
+@keyframes backdrop-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-backdrop-fade {
+  animation: backdrop-fade-in 0.2s ease-out forwards;
+}
+
+/* Distribution bar fill — width animates from 0 via CSS transition on mount */
+@keyframes bar-fill {
+  from {
+    width: 0%;
+  }
+}
+
+.animate-bar-fill {
+  animation: bar-fill 0.5s ease-out backwards;
 }

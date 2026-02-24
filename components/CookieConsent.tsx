@@ -56,29 +56,21 @@ export default function CookieConsent({ onConsentChange }: CookieConsentProps) {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[200] p-4 animate-slide-up">
-      <div className="max-w-4xl mx-auto bg-gradient-to-b from-[#1e3a5f] to-[#0f1c2e] rounded-xl shadow-2xl border border-white/10 overflow-hidden">
-        <div className="p-6">
-          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-            <div className="flex-1 text-center sm:text-left">
-              <h3 className="text-xl sm:text-2xl font-bold text-white font-baloo-2 mb-2">
-                Data Storage Notice
-              </h3>
-              <p className="text-white/80 text-sm sm:text-base">
-                Radiordle stores your game progress and statistics locally on your device to save your progress.
-                This data never leaves your device and is not shared with third parties.
-                By continuing, you agree to this local data storage.
-              </p>
-            </div>
+    <div className="fixed bottom-0 left-0 right-0 z-[200] p-3 sm:p-4 animate-slide-up">
+        <div className="max-w-xl mx-auto bg-surface/95 backdrop-blur-md rounded-lg shadow-2xl border border-white/10">
+          <div className="px-4 py-3 sm:px-5 sm:py-4 flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+            <p className="flex-1 text-white/80 text-xs sm:text-sm leading-snug text-center sm:text-left">
+              Radiordle uses local storage to save your game progress and statistics on this device.
+              No personal data is collected or shared with third parties. By continuing, you consent to this local data storage.
+            </p>
             <button
               onClick={handleAccept}
-              className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all whitespace-nowrap text-base sm:text-lg min-w-[160px]"
+              className="px-5 py-2 bg-gradient-to-r from-[#0891b2] to-[#0e7490] hover:from-[#0e7490] hover:to-[#0e7490] text-white font-bold font-baloo-2 rounded-lg transition-all whitespace-nowrap text-sm sm:text-base flex-shrink-0"
             >
-              Continue
+              Got it
             </button>
           </div>
         </div>
       </div>
-    </div>
   );
 }

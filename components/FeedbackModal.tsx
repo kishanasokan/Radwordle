@@ -91,11 +91,11 @@ export default function FeedbackModal({ isOpen, onClose, pageContext }: Feedback
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[100] p-4"
+      className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[100] p-4 animate-backdrop-fade"
       onClick={handleClose}
     >
       <div
-        className="bg-gradient-to-b from-[#1e3a5f] to-[#0f1c2e] rounded-lg p-4 sm:p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto font-baloo-2"
+        className="bg-gradient-to-b from-modal-bg to-page-bg-dark rounded-lg p-4 sm:p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto font-baloo-2 animate-modal-enter"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-6">
@@ -104,7 +104,7 @@ export default function FeedbackModal({ isOpen, onClose, pageContext }: Feedback
 
         {status === 'success' ? (
           <div className="text-center">
-            <div className="bg-[#407763] rounded-lg p-6 mb-6">
+            <div className="bg-success rounded-lg p-6 mb-6">
               <p className="text-xl font-bold text-white mb-2">Thank you!</p>
               <p className="text-gray-200">Your feedback has been submitted.</p>
             </div>
