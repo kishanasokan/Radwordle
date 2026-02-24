@@ -204,8 +204,8 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
         {/* Main Content */}
         <div className="flex-1 flex flex-col items-center justify-start sm:justify-start px-4 pb-4 sm:pb-4 sm:pt-10">
 
-          {/* Medical Image Display */}
-          <div className="w-full max-w-3xl lg:max-w-4xl mb-3 sm:mb-6">
+          {/* Medical Image Display - sticky on mobile so it stays visible when keyboard opens */}
+          <div className="w-full max-w-3xl lg:max-w-4xl mb-3 sm:mb-6 sticky top-0 sm:static z-20 bg-page-bg pb-2">
             <div className={`relative w-full aspect-[16/9] bg-black rounded-lg overflow-hidden shadow-2xl transition-all duration-300 ${imageBorderStyle}${showImagePulse ? ' animate-image-pulse' : ''}`}>
               {puzzle.image_url ? (
                 <Image

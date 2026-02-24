@@ -99,24 +99,34 @@ export default function GameClient({
   const [showModal, setShowModal] = useState(() => gameState?.isComplete || false);
   const [toast, setToast] = useState<ToastType>(null);
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [consentGiven, setConsentGiven] = useState(() => getCookieConsent() === 'accepted');
+  // Always start false to avoid SSR/client hydration mismatch, then check localStorage after mount
+  const [consentGiven, setConsentGiven] = useState(false);
+  const consentFallbackFired = useRef(false);
 
-  // Re-check consent when the cookie banner is dismissed (storage event or periodic check)
-  // Fallback: auto-enable after 5s in case the consent banner fails to render
+  // Check consent after hydration, then poll for changes
   useEffect(() => {
-    if (consentGiven) return;
+    // Immediate check after mount (avoids hydration mismatch since useState always starts false)
+    if (getCookieConsent() === 'accepted') {
+      setConsentGiven(true);
+      return;
+    }
+    // Poll for consent changes (banner dismissal)
     const interval = setInterval(() => {
       if (getCookieConsent() === 'accepted') {
         setConsentGiven(true);
       }
     }, 500);
+    return () => clearInterval(interval);
+  }, [consentGiven]);
+
+  // Separate one-shot fallback that survives effect re-runs (strict mode, hydration)
+  useEffect(() => {
+    if (consentGiven || consentFallbackFired.current) return;
     const fallbackTimeout = setTimeout(() => {
+      consentFallbackFired.current = true;
       setConsentGiven(true);
     }, 5000);
-    return () => {
-      clearInterval(interval);
-      clearTimeout(fallbackTimeout);
-    };
+    return () => clearTimeout(fallbackTimeout);
   }, [consentGiven]);
   const guessStartTime = useRef<number>(0);
   const gameStartTime = useRef<number>(0);
