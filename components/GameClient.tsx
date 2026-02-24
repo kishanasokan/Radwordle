@@ -32,6 +32,8 @@ interface GameClientProps {
   dayNumber: number;
   puzzleNumber: number;
   correctAnswer: string;
+  citation?: string | null;
+  learnLink?: string | null;
   isArchive: boolean;
   onGameStateChange: (state: GameState) => void;
   onTypingStateChange?: (isTyping: boolean) => void;
@@ -64,6 +66,8 @@ export default function GameClient({
   dayNumber,
   puzzleNumber,
   correctAnswer,
+  citation,
+  learnLink,
   isArchive,
   onGameStateChange,
   onTypingStateChange,
@@ -354,6 +358,8 @@ export default function GameClient({
           guessCount={gameState.guesses.length}
           guesses={gameState.guesses}
           correctAnswer={correctAnswer}
+          citation={citation}
+          learnLink={learnLink}
           dayNumber={dayNumber}
           isArchive={isArchive}
           onClose={handleCloseModal}
@@ -368,6 +374,8 @@ interface ResultsModalProps {
   guessCount: number;
   guesses: string[];
   correctAnswer: string;
+  citation?: string | null;
+  learnLink?: string | null;
   dayNumber: number;
   isArchive: boolean;
   onClose: () => void;
@@ -378,6 +386,8 @@ function ResultsModal({
   guessCount,
   guesses,
   correctAnswer,
+  citation,
+  learnLink,
   dayNumber,
   isArchive,
   onClose,
@@ -487,6 +497,11 @@ function ResultsModal({
               The correct answer was: {correctAnswer}
             </p>
           )}
+          {citation && (
+            <p className="text-xs mt-2 italic text-white/70">
+              {citation}
+            </p>
+          )}
         </div>
 
         {/* Statistics */}
@@ -550,10 +565,22 @@ function ResultsModal({
         {/* Share Button */}
         <button
           onClick={handleShare}
-          className="w-full px-6 py-3 bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] hover:from-[#f59e0b] hover:to-[#f59e0b] text-black font-bold text-lg rounded-lg transition-all shadow-lg mb-6"
+          className={`w-full px-6 py-3 bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] hover:from-[#f59e0b] hover:to-[#f59e0b] text-black font-bold text-lg rounded-lg transition-all shadow-lg ${learnLink ? 'mb-3' : 'mb-6'}`}
         >
           Share Results
         </button>
+
+        {/* Learn More Button */}
+        {learnLink?.startsWith('http') && (
+          <a
+            href={learnLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full px-6 py-3 bg-gradient-to-r from-[#0891b2] to-[#0e7490] hover:from-[#0e7490] hover:to-[#0e7490] text-white font-bold text-lg rounded-lg transition-all shadow-lg mb-6 text-center"
+          >
+            Learn More
+          </a>
+        )}
 
         {/* How You Compare */}
         {stats.gamesWon > 0 && (
