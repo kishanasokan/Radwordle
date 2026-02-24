@@ -22,8 +22,8 @@ describe('CookieConsent', () => {
       vi.advanceTimersByTime(150)
     })
 
-    expect(screen.getByText('Data Storage Notice')).toBeInTheDocument()
-    expect(screen.getByText('Continue')).toBeInTheDocument()
+    expect(screen.getByText(/Radiordle uses local storage/)).toBeInTheDocument()
+    expect(screen.getByText('Got it')).toBeInTheDocument()
   })
 
   it('does not show banner when consent previously accepted', async () => {
@@ -35,10 +35,10 @@ describe('CookieConsent', () => {
       vi.advanceTimersByTime(150)
     })
 
-    expect(screen.queryByText('Data Storage Notice')).not.toBeInTheDocument()
+    expect(screen.queryByText(/Radiordle uses local storage/)).not.toBeInTheDocument()
   })
 
-  it('hides banner and saves consent when Continue is clicked', async () => {
+  it('hides banner and saves consent when Got it is clicked', async () => {
     vi.useRealTimers()
     const user = userEvent.setup()
 
@@ -49,11 +49,11 @@ describe('CookieConsent', () => {
       await new Promise(resolve => setTimeout(resolve, 150))
     })
 
-    expect(screen.getByText('Data Storage Notice')).toBeInTheDocument()
+    expect(screen.getByText(/Radiordle uses local storage/)).toBeInTheDocument()
 
-    await user.click(screen.getByText('Continue'))
+    await user.click(screen.getByText('Got it'))
 
-    expect(screen.queryByText('Data Storage Notice')).not.toBeInTheDocument()
+    expect(screen.queryByText(/Radiordle uses local storage/)).not.toBeInTheDocument()
     expect(localStorage.getItem('radiordle_cookie_consent')).toBe('accepted')
   })
 
@@ -68,7 +68,7 @@ describe('CookieConsent', () => {
       await new Promise(resolve => setTimeout(resolve, 150))
     })
 
-    await user.click(screen.getByText('Continue'))
+    await user.click(screen.getByText('Got it'))
 
     expect(onConsentChange).toHaveBeenCalledWith(true)
   })
@@ -77,6 +77,6 @@ describe('CookieConsent', () => {
     render(<CookieConsent />)
 
     // Before the 100ms delay fires
-    expect(screen.queryByText('Data Storage Notice')).not.toBeInTheDocument()
+    expect(screen.queryByText(/Radiordle uses local storage/)).not.toBeInTheDocument()
   })
 })

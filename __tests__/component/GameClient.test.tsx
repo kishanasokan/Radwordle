@@ -70,6 +70,8 @@ function getInput() {
 beforeEach(() => {
   vi.clearAllMocks()
   localStorage.clear()
+  // Set cookie consent so the input is enabled with "Diagnosis..." placeholder
+  localStorage.setItem('radiordle_cookie_consent', 'accepted')
   mockGetGameState.mockReturnValue(null)
   mockGetStatistics.mockReturnValue({
     gamesPlayed: 0,
@@ -142,8 +144,8 @@ describe('GameClient', () => {
     it('shows guess counter when game is in progress', () => {
       render(<GameClient {...defaultProps} />)
 
-      // Desktop + mobile both render counter
-      const counters = screen.getAllByText(/Guesses: 0 \/ 5/)
+      // Desktop + mobile both render counter (shows next guess number, 1-indexed)
+      const counters = screen.getAllByText(/Guess 1 \/ 5/)
       expect(counters.length).toBeGreaterThan(0)
     })
   })

@@ -38,28 +38,29 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
   }, [gameState?.isComplete]);
 
   // Track initial hint count so only newly revealed hints animate (not restored from save)
-  const initialHintCount = useRef<number | null>(null);
+  const [baseHintCount, setBaseHintCount] = useState<number | null>(null);
+  const baseHintCaptured = useRef(false);
+
+  // Track whether the image border has appeared (for pulse animation)
+  const [showImagePulse, setShowImagePulse] = useState(false);
+  const prevHadBorder = useRef(false);
 
   const handleGameStateChange = useCallback((state: GameState) => {
     setGameState(state);
-  }, []);
 
-  // Capture the hint count on first game state load
-  useEffect(() => {
-    if (gameState && initialHintCount.current === null) {
-      initialHintCount.current = gameState.revealedHints;
+    // Capture the hint count on first game state load (one-shot)
+    if (!baseHintCaptured.current) {
+      setBaseHintCount(state.revealedHints);
+      baseHintCaptured.current = true;
     }
-  }, [gameState]);
 
-  // Track whether the image border has appeared (for pulse animation)
-  const hasImageBorder = !!(gameState?.guessResults[0]);
-  const prevHadBorder = useRef(false);
-  const showImagePulse = hasImageBorder && !prevHadBorder.current;
-  useEffect(() => {
-    if (hasImageBorder) {
+    // Trigger pulse animation when image border first appears
+    const hasBorder = !!(state.guessResults[0]);
+    if (hasBorder && !prevHadBorder.current) {
+      setShowImagePulse(true);
       prevHadBorder.current = true;
     }
-  }, [hasImageBorder]);
+  }, []);
 
   // Determine which hints to show based on game state
   // Show all hints when game is complete, otherwise only show revealed hints
@@ -273,7 +274,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
                 }
 
                 // Only animate hints that were revealed after the initial load
-                const isNewHint = initialHintCount.current !== null && index >= initialHintCount.current;
+                const isNewHint = baseHintCount !== null && index >= baseHintCount;
 
                 return (
                   <div

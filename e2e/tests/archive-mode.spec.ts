@@ -23,9 +23,9 @@ test.describe('Archive Mode', () => {
     await expect(page.getByRole('heading', { name: 'Archive' })).toBeVisible();
     await expect(page.getByText('Play any past puzzle!')).toBeVisible();
 
-    // Verify days are listed (use exact match to avoid "Day 1" matching "Day 10")
+    // Verify days are listed as grid links
     const dayLinks = page.locator('a[href^="/archive/"], a[href="/"]').filter({
-      has: page.locator('.font-bold.text-lg'),
+      has: page.locator('.font-bold'),
     });
     const count = await dayLinks.count();
     expect(count).toBeGreaterThan(0);
@@ -34,13 +34,17 @@ test.describe('Archive Mode', () => {
     await expect(page.getByText('TODAY')).toBeVisible();
   });
 
-  test('should show PLAY badge for unplayed days', async ({ page }) => {
+  test('should show unplayed days with default styling', async ({ page }) => {
     await page.goto('/archive');
 
-    // All days should show PLAY badge initially (no games played)
-    const playBadges = page.locator('text=PLAY');
-    const count = await playBadges.count();
+    // Unplayed days use bg-surface styling (no success/error color)
+    const dayLinks = page.locator('a[href^="/archive/"]');
+    const count = await dayLinks.count();
     expect(count).toBeGreaterThan(0);
+
+    // At least one link should have bg-surface (unplayed default)
+    const firstLink = dayLinks.first();
+    await expect(firstLink).toHaveClass(/bg-surface/);
   });
 
   test('should navigate to archive game when clicking a past day', async ({ page }) => {
@@ -130,8 +134,9 @@ test.describe('Archive Mode', () => {
     // Navigate back to archive
     await page.goto('/archive');
 
-    // The played day should now show WON badge
-    await expect(page.getByText('WON').first()).toBeVisible({ timeout: 3000 });
+    // The played day should now show success styling (green bg with checkmark SVG)
+    const wonLink = page.locator('a[class*="bg-success"]');
+    await expect(wonLink.first()).toBeVisible({ timeout: 3000 });
   });
 
   test('should redirect today to home page', async ({ page }) => {

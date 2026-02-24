@@ -221,7 +221,7 @@ test.describe('Autocomplete & Validation', () => {
     await getSubmitButton(page).click();
 
     // Should not show any error (empty submit is silently ignored)
-    // Guess counter should stay at 0
-    await expect(page.getByText('Guesses: 0 / 5').first()).toBeVisible();
+    // Guess counter should still show initial state (next guess = 1)
+    await expect(page.getByText('Guess 1 / 5').first()).toBeVisible();
   });
 });

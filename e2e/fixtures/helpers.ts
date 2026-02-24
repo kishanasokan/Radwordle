@@ -59,11 +59,11 @@ export async function extractCorrectAnswer(page: Page): Promise<string> {
  * Accepts the cookie consent banner if visible.
  */
 export async function acceptCookieConsent(page: Page): Promise<void> {
-  const banner = page.getByText('Data Storage Notice');
+  const banner = page.getByText('Radiordle uses local storage', { exact: false });
   // Wait a bit for the delayed banner to appear
   try {
     await banner.waitFor({ state: 'visible', timeout: 3000 });
-    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByRole('button', { name: 'Got it' }).click();
     await banner.waitFor({ state: 'hidden', timeout: 2000 });
   } catch {
     // Banner might not appear if consent was already given
@@ -136,8 +136,8 @@ export async function makeIncorrectGuess(
  * Gets the current guess count displayed on the page.
  */
 export async function getGuessCount(page: Page): Promise<{ current: number; max: number }> {
-  const text = await page.locator('text=/Guesses: \\d+ \\/ \\d+/').first().textContent();
-  const match = text?.match(/Guesses: (\d+) \/ (\d+)/);
+  const text = await page.locator('text=/Guess \\d+ \\/ \\d+/').first().textContent();
+  const match = text?.match(/Guess (\d+) \/ (\d+)/);
   if (!match) throw new Error('Could not parse guess count');
   return { current: parseInt(match[1]), max: parseInt(match[2]) };
 }
