@@ -486,7 +486,7 @@ function ResultsModal({
         // Silent fail
       }
     }
-  }, [guesses, correctAnswer, dayNumber, isWon, guessCount, isArchive]);
+  }, [guesses, correctAnswer, dayNumber, isWon, guessCount, isArchive, onCopied]);
 
   return (
     <div

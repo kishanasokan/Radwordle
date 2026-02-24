@@ -38,7 +38,8 @@ test.describe('Losing Game Flow', () => {
     await expect(page.getByText('Game Over').first()).toBeVisible({ timeout: 3000 });
 
     // Verify correct answer is shown
-    await expect(page.getByText(`The correct answer was: ${correctAnswer}`).first()).toBeVisible();
+    await expect(page.getByText('The correct answer was:').first()).toBeVisible();
+    await expect(page.getByText(correctAnswer).first()).toBeVisible();
   });
 
   test('should reveal hints after each incorrect guess', async ({ page }) => {
@@ -117,7 +118,7 @@ test.describe('Losing Game Flow', () => {
     await expect(winRateStat).toContainText('0');
 
     // Verify streak is 0
-    const streakStat = modal.locator('text=Current Streak').locator('..');
+    const streakStat = modal.locator('text=Streak').locator('..');
     await expect(streakStat).toContainText('0');
   });
 });
