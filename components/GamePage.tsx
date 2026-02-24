@@ -89,18 +89,32 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
     <div className="min-h-screen-safe relative overflow-y-auto overflow-x-hidden" style={{ minHeight: 'var(--full-vh)' }}>
       {/* Gradient Background - fixed on desktop so it doesn't scroll with content */}
       <div className="absolute sm:fixed inset-0 bg-gradient-to-br from-page-bg via-page-bg-mid to-page-bg pointer-events-none">
-        {/* Ambient decorative orbs — CSS-only, no image downloads, GPU-composited */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-[20%] -right-[10%] w-[500px] h-[500px] sm:w-[700px] sm:h-[700px] rounded-full bg-accent/[0.04] blur-3xl"></div>
-          <div className="absolute -bottom-[15%] -left-[10%] w-[400px] h-[400px] sm:w-[600px] sm:h-[600px] rounded-full bg-blue-400/[0.06] blur-3xl"></div>
-          <div className="absolute top-[45%] left-[50%] -translate-x-1/2 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] rounded-full bg-page-bg-mid/20 blur-3xl"></div>
+        {/* Background decorative medical images - horizontal on desktop, vertical on mobile */}
+        {/* Desktop layout - horizontal */}
+        <div className="hidden sm:flex absolute inset-0 opacity-20 items-end justify-center pb-8">
+          <div className="relative w-[900px] h-[500px]">
+            <div className="absolute left-0 top-1/2 w-96 h-96 bg-[url('/placeholder-xray.png')] bg-contain bg-no-repeat opacity-40" style={{ transform: 'translateY(-50%) rotate(-8deg)' }}></div>
+            <div className="absolute left-1/2 top-1/2 w-80 h-80 bg-[url('/placeholder-scan.png')] bg-contain bg-no-repeat opacity-35" style={{ transform: 'translate(-50%, -50%) rotate(5deg)' }}></div>
+            <div className="absolute right-0 top-1/2 w-72 h-72 bg-[url('/placeholder-ct.png')] bg-contain bg-no-repeat opacity-30 rounded-full" style={{ transform: 'translateY(-50%) rotate(-12deg)' }}></div>
+          </div>
+        </div>
+        {/* Mobile layout - triangle arrangement behind hint/guess area (bottom half of screen) */}
+        <div className="flex sm:hidden absolute inset-0 opacity-20">
+          <div className="absolute bottom-0 left-0 right-0 h-[55%]">
+            {/* Top center image */}
+            <div className="absolute left-1/2 top-[0%] w-72 h-72 bg-[url('/placeholder-xray.png')] bg-contain bg-no-repeat opacity-40" style={{ transform: 'translateX(-50%) rotate(-8deg)' }}></div>
+            {/* Bottom left image */}
+            <div className="absolute left-[5%] bottom-[5%] w-64 h-64 bg-[url('/placeholder-scan.png')] bg-contain bg-no-repeat opacity-35" style={{ transform: 'rotate(5deg)' }}></div>
+            {/* Bottom right image */}
+            <div className="absolute right-[5%] bottom-[5%] w-64 h-64 bg-[url('/placeholder-ct.png')] bg-contain bg-no-repeat opacity-30 rounded-full" style={{ transform: 'rotate(-12deg)' }}></div>
+          </div>
         </div>
 
-        {/* Radial Vignette - Softened for breathing room */}
+        {/* Radial Vignette - Static, Performance Optimized */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse at center, transparent 0%, transparent 50%, rgba(0, 0, 0, 0.15) 70%, rgba(0, 0, 0, 0.45) 85%, rgba(0, 0, 0, 0.65) 100%)'
+            background: 'radial-gradient(ellipse at center, transparent 0%, transparent 45%, rgba(0, 0, 0, 0.3) 70%, rgba(0, 0, 0, 0.75) 88%, rgba(0, 0, 0, 0.9) 100%)'
           }}
         ></div>
       </div>
