@@ -161,6 +161,16 @@ export default function AboutPage() {
               </div>
             </section>
 
+            {/* Disclaimer */}
+            <section className="bg-white/5 rounded-xl p-6 sm:p-8 border border-white/10">
+              <h2 className="text-2xl sm:text-3xl text-white font-baloo-2 font-bold mb-4">
+                Disclaimer
+              </h2>
+              <p className="text-white/70 text-sm leading-relaxed">
+                Radiordle is designed for entertainment and general educational interest only and does not provide medical advice. Users should consult a qualified healthcare professional for medical concerns. All images used are sourced from open-source or free-use collections and are used in accordance with their licenses.
+              </p>
+            </section>
+
             {/* Legal Buttons */}
             <LegalModals />
 

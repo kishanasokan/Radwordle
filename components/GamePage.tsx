@@ -67,7 +67,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
   const showAnnotated = !!annotatedImageUrl && (gameState?.guesses.length ?? 0) >= 1;
 
   return (
-    <div className="min-h-screen sm:min-h-screen min-h-screen-safe relative overflow-y-auto overflow-x-hidden">
+    <div className="min-h-screen-safe relative overflow-y-auto overflow-x-hidden" style={{ minHeight: 'var(--full-vh)' }}>
       {/* Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#1a2e5a] via-[#233b6e] to-[#1a2e5a]">
         {/* Background decorative medical images - horizontal on desktop, vertical on mobile */}
@@ -101,7 +101,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
       </div>
 
       {/* Content */}
-      <div className="relative z-10 min-h-screen sm:min-h-screen min-h-screen-safe flex flex-col">
+      <div className="relative z-10 min-h-screen-safe flex flex-col" style={{ minHeight: 'var(--full-vh)' }}>
         {/* Header with Logo and Buttons */}
         <div className="flex flex-col sm:flex-row sm:items-center p-3 sm:p-6 gap-0 sm:gap-0">
           {/* Top row on mobile: Archives and Stats buttons */}
@@ -275,16 +275,6 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
         </div>
       </div>
 
-      {/* Footer - Only visible on desktop when playing */}
-      {!gameState?.isComplete && !showStats && (
-        <footer className="hidden sm:block relative bg-gradient-to-r from-[#0f1c2e] via-[#1a2744] to-[#0f1c2e] border-t border-white border-opacity-5">
-          <div className="max-w-6xl mx-auto px-6 py-4">
-            <p className="text-white text-center text-xs font-baloo-2 opacity-70">
-              Radiordle is designed for entertainment and general educational interest only and does not provide medical advice. Users should consult a qualified healthcare professional for medical concerns. All images used are sourced from open-source or free-use collections and are used in accordance with their licenses.
-            </p>
-          </div>
-        </footer>
-      )}
 
       {/* Stats Modal - Rendered outside z-10 content container to ensure it overlays everything */}
       <StatsModal
