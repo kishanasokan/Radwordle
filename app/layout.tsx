@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Baloo_2 } from "next/font/google";
 import "./globals.css";
 import CookieConsent from "@/components/CookieConsent";
 import StatsRecoveryProvider from "@/components/StatsRecoveryProvider";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -195,6 +196,7 @@ export default function RootLayout({
         {children}
         <StatsRecoveryProvider />
         <CookieConsent />
+        <Analytics />
       </body>
     </html>
   );
