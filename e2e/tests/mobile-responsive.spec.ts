@@ -41,8 +41,8 @@ test.describe('Mobile Responsiveness', () => {
     });
     expect(hasHorizontalScroll).toBe(false);
 
-    // Verify the mobile layout has the fixed bottom input
-    const fixedInput = page.locator('.fixed.bottom-0');
+    // Verify the mobile layout has the fixed bottom input (use z-40 to target the input bar, not the consent banner)
+    const fixedInput = page.locator('.fixed.bottom-0.z-40');
     await expect(fixedInput).toBeVisible();
   });
 
@@ -107,7 +107,7 @@ test.describe('Mobile Responsiveness', () => {
     await page.evaluate(() => localStorage.removeItem('radiordle_cookie_consent'));
     await page.reload();
 
-    const banner = page.getByText('Data Storage Notice');
+    const banner = page.getByText(/Radiordle uses local storage/);
     await expect(banner).toBeVisible({ timeout: 3000 });
 
     // Banner should not cause horizontal overflow
@@ -117,7 +117,7 @@ test.describe('Mobile Responsiveness', () => {
     expect(hasHorizontalScroll).toBe(false);
 
     // Accept it
-    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByRole('button', { name: 'Got it' }).click();
     await expect(banner).not.toBeVisible();
   });
 

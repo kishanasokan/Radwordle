@@ -68,22 +68,34 @@ describe('ArchiveBrowser', () => {
     expect(links[2]).toHaveAttribute('href', '/archive/0')
   })
 
-  it('shows WON badge for won games', () => {
+  it('shows checkmark icon for won games', () => {
     render(<ArchiveBrowser />)
 
-    expect(screen.getByText('WON')).toBeInTheDocument()
+    // Day 0 is won - its tile has a green background and SVG checkmark
+    const links = screen.getAllByRole('link')
+    const wonLink = links[2] // Day 0 (reverse order: day 2, 1, 0)
+    expect(wonLink.className).toContain('bg-success')
+    expect(wonLink.querySelector('svg')).toBeInTheDocument()
   })
 
-  it('shows LOST badge for lost games', () => {
+  it('shows X icon for lost games', () => {
     render(<ArchiveBrowser />)
 
-    expect(screen.getByText('LOST')).toBeInTheDocument()
+    // Day 1 is lost - its tile has a red background and SVG X mark
+    const links = screen.getAllByRole('link')
+    const lostLink = links[1] // Day 1
+    expect(lostLink.className).toContain('bg-error')
+    expect(lostLink.querySelector('svg')).toBeInTheDocument()
   })
 
-  it('shows PLAY badge for unplayed games', () => {
+  it('shows no icon for unplayed games', () => {
     render(<ArchiveBrowser />)
 
-    expect(screen.getByText('PLAY')).toBeInTheDocument()
+    // Day 2 is not played - its tile has surface background and no SVG icon
+    const links = screen.getAllByRole('link')
+    const unplayedLink = links[0] // Day 2 (today, not played)
+    expect(unplayedLink.className).toContain('bg-surface')
+    expect(unplayedLink.querySelector('svg')).not.toBeInTheDocument()
   })
 
   it('displays day numbers starting from 1 (not 0)', () => {

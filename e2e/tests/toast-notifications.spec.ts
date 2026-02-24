@@ -49,8 +49,8 @@ test.describe('Toast Notifications', () => {
     await expect(toast).toBeVisible({ timeout: 2000 });
     await expect(toast).toContainText('Correct!');
 
-    // Should have green background
-    await expect(toast).toHaveClass(/bg-green-500/);
+    // Should have green background (semantic token)
+    await expect(toast).toHaveClass(/bg-success/);
   });
 
   test('should show red toast on completely incorrect guess', async ({ page }) => {
@@ -65,11 +65,11 @@ test.describe('Toast Notifications', () => {
     const toastText = await toast.textContent();
     const classes = await toast.getAttribute('class');
 
-    // Should be either red (incorrect) or yellow (partial)
+    // Should be either red (incorrect) or yellow (partial) — using semantic tokens
     if (toastText?.includes('Not quite')) {
-      expect(classes).toContain('bg-red-500');
+      expect(classes).toContain('bg-error');
     } else if (toastText?.includes('Close!')) {
-      expect(classes).toContain('bg-yellow-500');
+      expect(classes).toContain('bg-warning');
     }
   });
 

@@ -59,11 +59,11 @@ export async function extractCorrectAnswer(page: Page): Promise<string> {
  * Accepts the cookie consent banner if visible.
  */
 export async function acceptCookieConsent(page: Page): Promise<void> {
-  const banner = page.getByText('Data Storage Notice');
+  const banner = page.getByText(/Radiordle uses local storage/);
   // Wait a bit for the delayed banner to appear
   try {
     await banner.waitFor({ state: 'visible', timeout: 3000 });
-    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByRole('button', { name: 'Got it' }).click();
     await banner.waitFor({ state: 'hidden', timeout: 2000 });
   } catch {
     // Banner might not appear if consent was already given
@@ -238,6 +238,7 @@ export const SEARCH_TERMS = [
 export async function waitForGameLoad(page: Page): Promise<void> {
   // Wait for the game image
   await page.locator('img[alt*="Puzzle"]').waitFor({ state: 'visible', timeout: 15000 });
-  // Wait for a visible input field (uses :visible to handle dual layout on any viewport)
-  await page.locator('input[placeholder="Diagnosis..."]:visible').first().waitFor({ state: 'visible', timeout: 5000 });
+  // Wait for the enabled input (placeholder="Diagnosis..." means consent is given).
+  // Allows up to 10s since GameClient polls consent every 500ms after banner dismissal.
+  await page.locator('input[placeholder="Diagnosis..."]:visible').first().waitFor({ state: 'visible', timeout: 10000 });
 }

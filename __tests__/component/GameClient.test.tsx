@@ -61,13 +61,17 @@ const defaultProps = {
 }
 
 // Helper: get the first input (desktop) since component renders desktop + mobile
-function getInput() {
-  return screen.getAllByPlaceholderText('Diagnosis...')[0]
+// Async because consent effect must fire before placeholder switches to "Diagnosis..."
+async function getInput() {
+  const inputs = await screen.findAllByPlaceholderText('Diagnosis...')
+  return inputs[0]
 }
 
 beforeEach(() => {
   vi.clearAllMocks()
   localStorage.clear()
+  // Set cookie consent so input is enabled (placeholder="Diagnosis...")
+  localStorage.setItem('radiordle_cookie_consent', 'accepted')
   mockGetGameState.mockReturnValue(null)
   mockGetStatistics.mockReturnValue({
     gamesPlayed: 0,
@@ -205,7 +209,7 @@ describe('GameClient', () => {
       const user = userEvent.setup()
       render(<GameClient {...defaultProps} />)
 
-      const input = getInput()
+      const input = await getInput()
       await user.type(input, 'Fracture')
       await user.keyboard('{Escape}')
       await user.keyboard('{Enter}')
@@ -222,7 +226,7 @@ describe('GameClient', () => {
       const user = userEvent.setup()
       render(<GameClient {...defaultProps} />)
 
-      const input = getInput()
+      const input = await getInput()
       await user.type(input, 'Fracture')
       await user.keyboard('{Escape}')
       await user.keyboard('{Enter}')
@@ -238,7 +242,7 @@ describe('GameClient', () => {
       const user = userEvent.setup()
       render(<GameClient {...defaultProps} />)
 
-      const input = getInput()
+      const input = await getInput()
       await user.type(input, 'pneumothorax')
       await user.keyboard('{Escape}')
       await user.keyboard('{Enter}')
@@ -250,7 +254,7 @@ describe('GameClient', () => {
       const user = userEvent.setup()
       render(<GameClient {...defaultProps} />)
 
-      const input = getInput()
+      const input = await getInput()
       await user.type(input, 'pneumothorax')
       await user.keyboard('{Escape}')
       await user.keyboard('{Enter}')
@@ -270,7 +274,7 @@ describe('GameClient', () => {
       const user = userEvent.setup()
       render(<GameClient {...defaultProps} />)
 
-      const input = getInput()
+      const input = await getInput()
       await user.type(input, 'Fracture')
       await user.keyboard('{Escape}')
       await user.keyboard('{Enter}')
@@ -284,7 +288,7 @@ describe('GameClient', () => {
       const user = userEvent.setup()
       render(<GameClient {...defaultProps} isArchive={true} />)
 
-      const input = getInput()
+      const input = await getInput()
       await user.type(input, 'pneumothorax')
       await user.keyboard('{Escape}')
       await user.keyboard('{Enter}')
@@ -299,7 +303,7 @@ describe('GameClient', () => {
       const user = userEvent.setup()
       render(<GameClient {...defaultProps} />)
 
-      const input = getInput()
+      const input = await getInput()
       await user.type(input, 'Fracture')
       await user.keyboard('{Escape}')
       await user.keyboard('{Enter}')

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Puzzle, Hint, Condition } from '@/lib/supabase';
@@ -38,7 +38,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
   }, [gameState?.isComplete]);
 
   // Track initial hint count so only newly revealed hints animate (not restored from save)
-  const initialHintCount = useRef<number | null>(null);
+  const [initialHintCount, setInitialHintCount] = useState<number | null>(null);
 
   const handleGameStateChange = useCallback((state: GameState) => {
     setGameState(state);
@@ -46,18 +46,20 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
 
   // Capture the hint count on first game state load
   useEffect(() => {
-    if (gameState && initialHintCount.current === null) {
-      initialHintCount.current = gameState.revealedHints;
+    if (gameState && initialHintCount === null) {
+      Promise.resolve().then(() => setInitialHintCount(gameState.revealedHints));
     }
-  }, [gameState]);
+  }, [gameState, initialHintCount]);
 
   // Track whether the image border has appeared (for pulse animation)
   const hasImageBorder = !!(gameState?.guessResults[0]);
-  const prevHadBorder = useRef(false);
-  const showImagePulse = hasImageBorder && !prevHadBorder.current;
+  const [showImagePulse, setShowImagePulse] = useState(false);
   useEffect(() => {
     if (hasImageBorder) {
-      prevHadBorder.current = true;
+      Promise.resolve().then(() => setShowImagePulse(true));
+      // Remove pulse class after animation completes
+      const timer = setTimeout(() => setShowImagePulse(false), 600);
+      return () => clearTimeout(timer);
     }
   }, [hasImageBorder]);
 
@@ -273,7 +275,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
                 }
 
                 // Only animate hints that were revealed after the initial load
-                const isNewHint = initialHintCount.current !== null && index >= initialHintCount.current;
+                const isNewHint = initialHintCount !== null && index >= initialHintCount;
 
                 return (
                   <div

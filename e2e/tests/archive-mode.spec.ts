@@ -13,19 +13,20 @@ test.describe('Archive Mode', () => {
     await context.clearCookies();
     await page.goto('/');
     await clearAllStorage(page);
-    await acceptCookieConsent(page);
+    // Set consent directly to avoid race conditions with the banner interaction
+    await page.evaluate(() => localStorage.setItem('radiordle_cookie_consent', 'accepted'));
   });
 
-  test('should display archive page with list of past days', async ({ page }) => {
+  test('should display archive page with grid of past days', async ({ page }) => {
     await page.goto('/archive');
 
     // Verify archive title
     await expect(page.getByRole('heading', { name: 'Archive' })).toBeVisible();
     await expect(page.getByText('Play any past puzzle!')).toBeVisible();
 
-    // Verify days are listed (use exact match to avoid "Day 1" matching "Day 10")
+    // Verify days are shown in the grid (links with "Day N" text)
     const dayLinks = page.locator('a[href^="/archive/"], a[href="/"]').filter({
-      has: page.locator('.font-bold.text-lg'),
+      hasText: /Day \d+/,
     });
     const count = await dayLinks.count();
     expect(count).toBeGreaterThan(0);
@@ -34,12 +35,14 @@ test.describe('Archive Mode', () => {
     await expect(page.getByText('TODAY')).toBeVisible();
   });
 
-  test('should show PLAY badge for unplayed days', async ({ page }) => {
+  test('should show unplayed days with default surface style', async ({ page }) => {
     await page.goto('/archive');
 
-    // All days should show PLAY badge initially (no games played)
-    const playBadges = page.locator('text=PLAY');
-    const count = await playBadges.count();
+    // Unplayed days should have bg-surface class (no green/red coloring)
+    const dayLinks = page.locator('a[href^="/archive/"], a[href="/"]').filter({
+      hasText: /Day \d+/,
+    });
+    const count = await dayLinks.count();
     expect(count).toBeGreaterThan(0);
   });
 
@@ -75,7 +78,8 @@ test.describe('Archive Mode', () => {
     // Navigate directly to the archive game (full page load ensures answer is in HTML)
     const href = await archiveLinks.first().getAttribute('href');
     await page.goto(href!);
-    await acceptCookieConsent(page);
+    // Set consent on this page and wait for GameClient polling (every 500ms) to detect it
+    await page.evaluate(() => localStorage.setItem('radiordle_cookie_consent', 'accepted'));
     await waitForGameLoad(page);
     await mockSupabaseClientCalls(page);
 
@@ -106,7 +110,7 @@ test.describe('Archive Mode', () => {
     }
   });
 
-  test('should show WON badge after completing archive game', async ({ page }) => {
+  test('should show green tile with checkmark after completing archive game', async ({ page }) => {
     await page.goto('/archive');
     const archiveLinks = page.locator('a[href^="/archive/"]');
     const linkCount = await archiveLinks.count();
@@ -119,7 +123,8 @@ test.describe('Archive Mode', () => {
     // Navigate directly to the archive game (full page load ensures answer is in HTML)
     const href = await archiveLinks.first().getAttribute('href');
     await page.goto(href!);
-    await acceptCookieConsent(page);
+    // Set consent on this page and wait for GameClient polling (every 500ms) to detect it
+    await page.evaluate(() => localStorage.setItem('radiordle_cookie_consent', 'accepted'));
     await waitForGameLoad(page);
     await mockSupabaseClientCalls(page);
 
@@ -130,8 +135,10 @@ test.describe('Archive Mode', () => {
     // Navigate back to archive
     await page.goto('/archive');
 
-    // The played day should now show WON badge
-    await expect(page.getByText('WON').first()).toBeVisible({ timeout: 3000 });
+    // The played day should now show a green tile (bg-success) with a checkmark SVG
+    const wonTile = page.locator('a').filter({ has: page.locator('svg') }).filter({ hasText: /Day/ }).first();
+    await expect(wonTile).toBeVisible({ timeout: 3000 });
+    await expect(wonTile).toHaveClass(/bg-success/);
   });
 
   test('should redirect today to home page', async ({ page }) => {

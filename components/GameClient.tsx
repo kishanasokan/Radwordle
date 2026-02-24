@@ -99,12 +99,19 @@ export default function GameClient({
   const [showModal, setShowModal] = useState(() => gameState?.isComplete || false);
   const [toast, setToast] = useState<ToastType>(null);
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [consentGiven, setConsentGiven] = useState(() => getCookieConsent() === 'accepted');
+  // Always initialize as false to match SSR (getCookieConsent returns 'pending' server-side).
+  // The polling effect below detects consent from localStorage on the client within 500ms.
+  const [consentGiven, setConsentGiven] = useState(false);
 
   // Re-check consent when the cookie banner is dismissed (storage event or periodic check)
   // Fallback: auto-enable after 5s in case the consent banner fails to render
   useEffect(() => {
     if (consentGiven) return;
+    // Check immediately on mount (avoids 500ms delay when consent already in localStorage)
+    if (getCookieConsent() === 'accepted') {
+      setConsentGiven(true);
+      return;
+    }
     const interval = setInterval(() => {
       if (getCookieConsent() === 'accepted') {
         setConsentGiven(true);

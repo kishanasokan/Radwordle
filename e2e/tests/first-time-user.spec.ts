@@ -20,9 +20,8 @@ test.describe('First-Time User Journey', () => {
 
   test('should show cookie consent banner on first visit', async ({ page }) => {
     // Cookie consent banner appears after a small delay
-    await expect(page.getByText('Data Storage Notice')).toBeVisible({ timeout: 3000 });
-    await expect(page.getByText('Radiordle stores your game progress')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible();
+    await expect(page.getByText(/Radiordle uses local storage/)).toBeVisible({ timeout: 3000 });
+    await expect(page.getByRole('button', { name: 'Got it' })).toBeVisible();
   });
 
   test('should dismiss cookie consent and save to localStorage', async ({ page }) => {
@@ -35,7 +34,7 @@ test.describe('First-Time User Journey', () => {
     expect(consent).toBe('accepted');
 
     // Verify banner is gone
-    await expect(page.getByText('Data Storage Notice')).not.toBeVisible();
+    await expect(page.getByText(/Radiordle uses local storage/)).not.toBeVisible();
   });
 
   test('should complete full game flow from start to win', async ({ page }) => {
