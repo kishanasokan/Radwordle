@@ -325,9 +325,9 @@ export default function GameClient({
           </div>
         ) : (
           <>
-            <div className="mb-4 text-white text-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
-              <p className="text-[1.237rem] font-baloo-2">
-                Guesses: {gameState.guesses.length} / {MAX_GUESSES}
+            <div className="mb-3 text-white/80 text-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
+              <p className="text-lg tracking-wide font-baloo-2">
+                Guess {gameState.guesses.length + 1} / {MAX_GUESSES}
               </p>
             </div>
             <DiagnosisAutocomplete
@@ -366,9 +366,9 @@ export default function GameClient({
         ) : (
           <>
             {/* Guesses counter - in flow */}
-            <div className="mb-4 text-white text-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
-              <p className="text-[1.237rem] font-baloo-2">
-                Guesses: {gameState.guesses.length} / {MAX_GUESSES}
+            <div className="mb-3 text-white/80 text-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
+              <p className="text-lg tracking-wide font-baloo-2">
+                Guess {gameState.guesses.length + 1} / {MAX_GUESSES}
               </p>
             </div>
             {/* Input sticky at bottom on mobile - positions directly above keyboard */}

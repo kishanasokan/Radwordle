@@ -128,7 +128,7 @@ export default function StatsModal({ isOpen, onClose, stats }: StatsModalProps) 
 
         {/* How You Compare */}
         {stats.gamesWon > 0 && (
-          <div className="bg-gradient-to-r from-blue-500 from-10% to-indigo-600 to-90% bg-opacity-20 rounded-lg p-4 sm:p-6 mb-6">
+          <div className="bg-surface rounded-lg p-4 sm:p-6 mb-6">
             <h3 className="text-lg sm:text-xl font-bold text-white text-center mb-3">
               How You Compare
             </h3>

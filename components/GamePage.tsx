@@ -122,14 +122,14 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
       {/* Content */}
       <div className="relative z-10 min-h-screen-safe flex flex-col" style={{ minHeight: 'var(--full-vh)' }}>
         {/* Header with Logo and Buttons */}
-        <div className="flex flex-col sm:flex-row sm:items-center p-3 sm:p-6 gap-0 sm:gap-0">
+        <div className="flex flex-col sm:flex-row sm:items-center p-3 sm:px-6 sm:py-4 gap-0 sm:gap-0">
           {/* Top row on mobile: Archives and Stats buttons */}
           <div className="flex justify-between items-center sm:contents">
             {/* Archives Button - Left side container with fixed width on desktop */}
             <div className="sm:flex-1 sm:flex sm:justify-start">
               <Link
                 href="/archive"
-                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors"
+                className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 min-h-[36px] sm:min-h-[40px] bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors"
               >
                 <span className="text-base sm:text-xl">📁</span>
                 <span className="font-bold font-baloo-2 text-xs sm:text-base">Archives</span>
@@ -147,7 +147,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
                   className="object-contain"
                 />
               </div>
-              <h1 className="text-3xl md:text-[3.375rem] text-white font-baloo-2 font-extrabold tracking-tight">
+              <h1 className="text-4xl md:text-[3.375rem] text-white font-baloo-2 font-extrabold tracking-tight">
                 Radiordle
               </h1>
             </div>
@@ -157,7 +157,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
               <div className="flex items-center gap-1 sm:gap-2">
                 <Link
                   href="/about"
-                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 min-h-[36px] sm:min-h-[40px] bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors"
+                  className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 min-h-[36px] sm:min-h-[40px] bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors"
                   title="Learn More"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 sm:w-5 sm:h-5">
@@ -167,7 +167,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
                 </Link>
                 <button
                   onClick={() => setShowFeedback(true)}
-                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors"
+                  className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 min-h-[36px] sm:min-h-[40px] bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors"
                   title="Send Feedback"
                 >
                   <span className="text-base sm:text-xl">💬</span>
@@ -175,7 +175,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
                 </button>
                 <button
                   onClick={() => setShowStats(true)}
-                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors"
+                  className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 min-h-[36px] sm:min-h-[40px] bg-surface hover:bg-surface-hover text-white rounded-lg transition-colors"
                 >
                   <span className="text-base sm:text-xl">📊</span>
                   <span className="font-bold font-baloo-2 text-xs sm:text-base">Stats</span>
@@ -185,27 +185,27 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
           </div>
 
           {/* Logo and Title - Second row on mobile only */}
-          <div className="flex sm:hidden items-center justify-center gap-1 drop-shadow-[0_6px_20px_rgba(0,0,0,0.6)] -mb-1">
-            <div className="relative w-[72px] h-[72px]">
+          <div className="flex sm:hidden items-center justify-center gap-1.5 drop-shadow-[0_6px_20px_rgba(0,0,0,0.6)] mt-0.5 -mb-0.5">
+            <div className="relative w-14 h-14">
               <Image
                 src="/radle_icon.svg"
                 alt="Radiordle Icon"
-                width={72}
-                height={72}
+                width={56}
+                height={56}
                 className="object-contain"
               />
             </div>
-            <h1 className="text-[3.25rem] text-white font-baloo-2 font-extrabold tracking-tight">
+            <h1 className="text-[2.5rem] text-white font-baloo-2 font-extrabold tracking-tight">
               Radiordle
             </h1>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col items-center justify-start sm:justify-start px-4 pb-4 sm:pb-4 sm:pt-10">
+        <div className="flex-1 flex flex-col items-center justify-start sm:justify-start px-4 pt-2 pb-4 sm:pb-4 sm:pt-4">
 
           {/* Medical Image Display - sticky on mobile so it stays visible when keyboard opens */}
-          <div className="w-full max-w-3xl lg:max-w-4xl mb-3 sm:mb-6 sticky top-0 sm:static z-20 bg-page-bg pb-2">
+          <div className="w-full max-w-3xl lg:max-w-4xl mb-3 sm:mb-6 sticky top-0 sm:static z-20 pb-2">
             <div className={`relative w-full aspect-[16/9] bg-black rounded-lg overflow-hidden shadow-2xl transition-all duration-300 ${imageBorderStyle}${showImagePulse ? ' animate-image-pulse' : ''}`}>
               {puzzle.image_url ? (
                 <Image
@@ -237,13 +237,13 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
           </div>
 
           {/* Question */}
-          <h2 className="text-2xl sm:text-3xl md:text-[2.025rem] text-white font-bold font-baloo-2 mb-1 sm:mb-3 sm:mt-2 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
+          <h2 className="text-xl sm:text-2xl md:text-[1.75rem] text-white font-bold font-baloo-2 mb-2 sm:mb-4 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
             What&apos;s the Diagnosis?
           </h2>
 
           {/* Hints Display - only show revealed hints */}
           {visibleHints.length > 0 && (
-            <div className="w-full max-w-xl mx-auto space-y-3 mb-4 sm:mb-6">
+            <div className="w-full max-w-2xl mx-auto space-y-2.5 mb-4 sm:mb-6">
               {visibleHints.map((hint, index) => {
                 // Hints are revealed after a guess. The guess that revealed this hint is at index.
                 // To color the hint based on the NEXT guess after it was revealed, we look at index + 1.
@@ -268,7 +268,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
                   textColor = 'text-white';
                 } else {
                   // Default blue if no next guess yet
-                  hintStyle = 'bg-hint-default bg-opacity-60';
+                  hintStyle = 'bg-hint-default/70';
                   textColor = 'text-white';
                 }
 
@@ -278,15 +278,16 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
                 return (
                   <div
                     key={hint.id}
-                    className={`${hintStyle} ${textColor} backdrop-blur-sm rounded-lg px-6 py-4 transition-all duration-300${isNewHint ? ' animate-hint-reveal' : ''}`}
+                    className={`relative ${hintStyle} ${textColor} rounded-xl px-5 py-3.5 transition-all duration-300 border border-white/10 shadow-md${isNewHint ? ' animate-hint-reveal' : ''}`}
                   >
-                    {hint.hint_text ? (
-                      <p className="text-lg">{hint.hint_text}</p>
-                    ) : hint.image_caption ? (
-                      <p className="text-lg">{hint.image_caption}</p>
-                    ) : (
-                      <p className="text-lg opacity-50">Hint {index + 1}</p>
-                    )}
+                    <div className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold font-baloo-2">
+                        {index + 1}
+                      </span>
+                      <p className="text-base sm:text-lg leading-snug pt-0.5">
+                        {hint.hint_text || hint.image_caption || `Hint ${index + 1}`}
+                      </p>
+                    </div>
                   </div>
                 );
               })}
