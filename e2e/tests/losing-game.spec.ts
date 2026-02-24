@@ -117,8 +117,8 @@ test.describe('Losing Game Flow', () => {
     const winRateStat = modal.locator('text=Win %').locator('..');
     await expect(winRateStat).toContainText('0');
 
-    // Verify streak is 0
-    const streakStat = modal.locator('text=Streak').locator('..');
+    // Verify streak is 0 — use exact match to avoid also matching "Max Streak"
+    const streakStat = modal.getByText('Streak', { exact: true }).locator('..');
     await expect(streakStat).toContainText('0');
   });
 });

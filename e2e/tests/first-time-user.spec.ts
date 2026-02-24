@@ -118,8 +118,8 @@ test.describe('First-Time User Journey', () => {
     const playedStat = modal.locator('text=Played').locator('..');
     await expect(playedStat).toContainText('1');
 
-    // Verify streak
-    const streakStat = modal.locator('text=Streak').locator('..');
+    // Verify streak — use exact match to avoid also matching "Max Streak"
+    const streakStat = modal.getByText('Streak', { exact: true }).locator('..');
     await expect(streakStat).toContainText('1');
   });
 });
