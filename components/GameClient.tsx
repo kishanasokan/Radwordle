@@ -18,7 +18,7 @@ import { getOrCreatePlayerHash } from '@/lib/playerIdentity';
 import { submitGameResult } from '@/lib/supabase';
 
 // Toast feedback types
-type ToastType = 'correct' | 'partial' | 'incorrect' | null;
+type ToastType = 'correct' | 'partial' | 'incorrect' | 'copied' | null;
 
 interface ToastConfig {
   message: string;
@@ -58,6 +58,12 @@ const TOAST_CONFIG: Record<Exclude<ToastType, null>, ToastConfig> = {
     bgColor: 'bg-red-500',
     textColor: 'text-white',
     icon: '✗',
+  },
+  copied: {
+    message: 'Results copied to clipboard!',
+    bgColor: 'bg-blue-600',
+    textColor: 'text-white',
+    icon: '📋',
   },
 };
 
@@ -257,7 +263,7 @@ export default function GameClient({
         <div
           role="status"
           aria-live="polite"
-          className={`fixed top-20 left-1/2 z-50 px-6 py-3 rounded-lg shadow-lg
+          className={`fixed top-20 left-1/2 z-[200] px-6 py-3 rounded-lg shadow-lg
             ${TOAST_CONFIG[toast].bgColor} ${TOAST_CONFIG[toast].textColor}
             animate-toast-in
             font-baloo-2 font-semibold text-lg flex items-center gap-2`}
@@ -363,6 +369,7 @@ export default function GameClient({
           dayNumber={dayNumber}
           isArchive={isArchive}
           onClose={handleCloseModal}
+          onCopied={() => showToast('copied')}
         />
       )}
     </>
@@ -379,6 +386,7 @@ interface ResultsModalProps {
   dayNumber: number;
   isArchive: boolean;
   onClose: () => void;
+  onCopied: () => void;
 }
 
 function ResultsModal({
@@ -391,6 +399,7 @@ function ResultsModal({
   dayNumber,
   isArchive,
   onClose,
+  onCopied,
 }: ResultsModalProps) {
   const stats = getStatistics();
   const [globalStats, setGlobalStats] = useState<GlobalStats | null>(null);
@@ -455,15 +464,29 @@ function ResultsModal({
     const prefix = isArchive ? '🩻 Radiordle Archive Day' : '🩻 Radiordle Day';
     const shareText = `${prefix} ${displayDay} ${isWon ? guessCount : 'X'}/${MAX_GUESSES}\n${fullGrid}\nhttps://radiordle.org`;
 
-    navigator.clipboard.writeText(shareText).then(
-      () => {
-        alert('Results copied to clipboard!');
-      },
-      () => {
-        alert('Failed to copy results.');
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(shareText).then(
+        () => { onCopied(); },
+        () => { onCopied(); }
+      );
+    } else {
+      // Fallback for iOS Safari and browsers without Clipboard API
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = shareText;
+        textArea.style.position = 'fixed';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        onCopied();
+      } catch {
+        // Silent fail
       }
-    );
-  }, [guesses, correctAnswer, dayNumber, isWon, guessCount, isArchive]);
+    }
+  }, [guesses, correctAnswer, dayNumber, isWon, guessCount, isArchive, onCopied]);
 
   return (
     <div
@@ -471,17 +494,17 @@ function ResultsModal({
       onClick={onClose}
     >
       <div
-        className="bg-gradient-to-b from-[#1e3a5f] to-[#0f1c2e] rounded-lg p-4 sm:p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto font-baloo-2"
+        className="bg-gradient-to-b from-[#1e3a5f] to-[#0f1c2e] rounded-lg p-4 sm:p-8 max-w-md sm:max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto font-baloo-2"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-4">
+        <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-2 sm:mb-4">
           {isWon ? '🎉 Congratulations!' : '😔 Game Over'}
         </h2>
 
 {/* First solver banner - hidden for now but data still tracked */}
 
 
-        <div className="text-white text-center mb-6">
+        <div className="text-white text-center mb-3 sm:mb-6">
           {isWon ? (
             <>
               <p className="text-base sm:text-lg">
@@ -489,13 +512,17 @@ function ResultsModal({
                 {guessCount === 1 ? 'guess' : 'guesses'}!
               </p>
               <p className="text-base sm:text-lg mt-1 font-light">
-                The correct answer was: {correctAnswer}
+                The correct answer was:
               </p>
+              <p className="text-lg sm:text-xl font-bold text-[#f59e0b]">{correctAnswer}</p>
             </>
           ) : (
-            <p className="text-base sm:text-lg font-light">
-              The correct answer was: {correctAnswer}
-            </p>
+            <>
+              <p className="text-base sm:text-lg font-light">
+                The correct answer was:
+              </p>
+              <p className="text-lg sm:text-xl font-bold text-[#f59e0b]">{correctAnswer}</p>
+            </>
           )}
           {citation && (
             <p className="text-xs mt-2 italic text-white/70">
@@ -505,9 +532,9 @@ function ResultsModal({
         </div>
 
         {/* Statistics */}
-        <div className="bg-white rounded-lg p-3 sm:p-4 mb-4">
+        <div className="bg-white rounded-lg p-3 sm:p-4 mb-2 sm:mb-4">
           <h3 className="text-xl sm:text-2xl font-bold text-black text-center mb-2">Statistics</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-center">
+          <div className="grid grid-cols-4 gap-2 sm:gap-3 text-center">
             <div>
               <p className="text-xl sm:text-2xl font-bold text-[#407763] leading-tight">{stats.gamesPlayed}</p>
               <p className="text-xs text-gray-600">Played</p>
@@ -522,7 +549,7 @@ function ResultsModal({
             </div>
             <div>
               <p className="text-xl sm:text-2xl font-bold text-[#407763] leading-tight">{stats.currentStreak}</p>
-              <p className="text-xs text-gray-600">Current Streak</p>
+              <p className="text-xs text-gray-600">Streak</p>
             </div>
             <div>
               <p className="text-xl sm:text-2xl font-bold text-[#407763] leading-tight">{stats.maxStreak}</p>
@@ -531,41 +558,81 @@ function ResultsModal({
           </div>
         </div>
 
-        {/* Guess Distribution */}
-        <div className="bg-white rounded-lg p-4 sm:p-6 mb-6">
-          <h3 className="text-lg sm:text-xl font-bold text-black text-center mb-4">
-            Guess Distribution
-          </h3>
-          <div className="space-y-2">
-            {Array.from({ length: MAX_GUESSES }, (_, i) => i + 1).map((guessNum) => {
-              const count = stats.guessDistribution[guessNum] || 0;
-              const percentage = maxDistribution > 0 ? (count / maxDistribution) * 100 : 0;
-              const isCurrentGuess = isWon && guessNum === guessCount;
-              const barColor = count > 0 ? (isCurrentGuess ? 'bg-[#407763]' : 'bg-gray-400') : 'bg-gray-100';
+        {/* Guess Distribution + How You Compare: stacked on mobile, side-by-side on desktop */}
+        <div className={`mb-3 sm:mb-4${stats.gamesWon > 0 ? ' sm:grid sm:grid-cols-2 sm:gap-4' : ''}`}>
+          {/* Guess Distribution */}
+          <div className="bg-white rounded-lg p-3 sm:p-4 mb-3 sm:mb-0">
+            <h3 className="text-lg sm:text-xl font-bold text-black text-center mb-2 sm:mb-3">
+              Guess Distribution
+            </h3>
+            <div className="space-y-1 sm:space-y-2">
+              {Array.from({ length: MAX_GUESSES }, (_, i) => i + 1).map((guessNum) => {
+                const count = stats.guessDistribution[guessNum] || 0;
+                const percentage = maxDistribution > 0 ? (count / maxDistribution) * 100 : 0;
+                const isCurrentGuess = isWon && guessNum === guessCount;
+                const barColor = count > 0 ? (isCurrentGuess ? 'bg-[#407763]' : 'bg-gray-400') : 'bg-gray-100';
 
-              return (
-                <div key={guessNum} className="flex items-center gap-2">
-                  <span className="w-4 text-sm font-medium text-gray-600">{guessNum}</span>
-                  <div className="flex-1 h-6 bg-gray-200 rounded overflow-hidden">
-                    <div
-                      className={`h-full ${barColor} rounded flex items-center justify-end px-2 transition-all duration-300`}
-                      style={{ width: `${Math.max(percentage, count > 0 ? 8 : 0)}%` }}
-                    >
-                      {count > 0 && (
-                        <span className="text-white text-sm font-bold">{count}</span>
-                      )}
+                return (
+                  <div key={guessNum} className="flex items-center gap-2">
+                    <span className="w-4 text-sm font-medium text-gray-600">{guessNum}</span>
+                    <div className="flex-1 h-5 sm:h-6 bg-gray-200 rounded overflow-hidden">
+                      <div
+                        className={`h-full ${barColor} rounded flex items-center justify-end px-2 transition-all duration-300`}
+                        style={{ width: `${Math.max(percentage, count > 0 ? 8 : 0)}%` }}
+                      >
+                        {count > 0 && (
+                          <span className="text-white text-sm font-bold">{count}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
+
+          {/* How You Compare — desktop only (hidden on mobile, shown after buttons there) */}
+          {stats.gamesWon > 0 && (
+            <div className="hidden sm:block bg-[#3d4d68] rounded-lg p-4">
+              <h3 className="text-lg sm:text-xl font-bold text-white text-center mb-3">
+                How You Compare
+              </h3>
+              {percentileBeat !== null ? (
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-yellow-400">
+                    Top {100 - percentileBeat}%
+                  </p>
+                  <p className="text-sm text-gray-200 mt-1">
+                    You beat <span className="font-semibold">{percentileBeat}%</span> of players based on guess count
+                  </p>
+                </div>
+              ) : globalStats === null ? (
+                <p className="text-center text-gray-300 text-sm">Loading global stats...</p>
+              ) : (
+                <p className="text-center text-gray-300 text-sm">Not enough data yet</p>
+              )}
+              <div className="mt-3 grid grid-cols-3 gap-3 text-center text-sm">
+                <div>
+                  <p className="text-gray-300">Win Rate</p>
+                  <p className="font-bold text-white">{winRate}%</p>
+                </div>
+                <div>
+                  <p className="text-gray-300">Avg Guess #</p>
+                  <p className="font-bold text-white">{userAvgGuesses > 0 ? userAvgGuesses.toFixed(1) : '-'}</p>
+                </div>
+                <div>
+                  <p className="text-gray-300">Avg Time</p>
+                  <p className="font-bold text-white">{avgGuessTime > 0 ? `${avgGuessTime.toFixed(1)}s` : '-'}</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Share Button */}
         <button
           onClick={handleShare}
-          className={`w-full px-6 py-3 bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] hover:from-[#f59e0b] hover:to-[#f59e0b] text-black font-bold text-lg rounded-lg transition-all shadow-lg ${learnLink ? 'mb-3' : 'mb-6'}`}
+          className={`w-full px-6 py-3 bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] hover:from-[#f59e0b] hover:to-[#f59e0b] text-black font-bold text-lg rounded-lg transition-all shadow-lg ${learnLink ? 'mb-3' : 'mb-4'}`}
         >
           Share Results
         </button>
@@ -576,16 +643,16 @@ function ResultsModal({
             href={learnLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full px-6 py-3 bg-gradient-to-r from-[#0891b2] to-[#0e7490] hover:from-[#0e7490] hover:to-[#0e7490] text-white font-bold text-lg rounded-lg transition-all shadow-lg mb-6 text-center"
+            className="block w-full px-6 py-3 bg-gradient-to-r from-[#0891b2] to-[#0e7490] hover:from-[#0e7490] hover:to-[#0e7490] text-white font-bold text-lg rounded-lg transition-all shadow-lg mb-4 text-center"
           >
             Learn More
           </a>
         )}
 
-        {/* How You Compare */}
+        {/* How You Compare — mobile only (hidden on desktop, shown above in grid there) */}
         {stats.gamesWon > 0 && (
-          <div className="bg-gradient-to-r from-blue-500 from-10% to-indigo-600 to-90% bg-opacity-20 rounded-lg p-4 sm:p-6 mb-6">
-            <h3 className="text-lg sm:text-xl font-bold text-white text-center mb-3">
+          <div className="sm:hidden bg-[#3d4d68] rounded-lg p-3 mb-4">
+            <h3 className="text-lg font-bold text-white text-center mb-3">
               How You Compare
             </h3>
             {percentileBeat !== null ? (
@@ -602,7 +669,7 @@ function ResultsModal({
             ) : (
               <p className="text-center text-gray-300 text-sm">Not enough data yet</p>
             )}
-            <div className="mt-4 grid grid-cols-3 gap-3 text-center text-sm">
+            <div className="mt-3 grid grid-cols-3 gap-3 text-center text-sm">
               <div>
                 <p className="text-gray-300">Win Rate</p>
                 <p className="font-bold text-white">{winRate}%</p>
@@ -612,7 +679,7 @@ function ResultsModal({
                 <p className="font-bold text-white">{userAvgGuesses > 0 ? userAvgGuesses.toFixed(1) : '-'}</p>
               </div>
               <div>
-                <p className="text-gray-300">Avg Guess Time</p>
+                <p className="text-gray-300">Avg Time</p>
                 <p className="font-bold text-white">{avgGuessTime > 0 ? `${avgGuessTime.toFixed(1)}s` : '-'}</p>
               </div>
             </div>

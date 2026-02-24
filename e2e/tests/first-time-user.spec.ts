@@ -61,7 +61,8 @@ test.describe('First-Time User Journey', () => {
 
     // Verify win modal appears
     await expect(page.getByText('Congratulations!').first()).toBeVisible({ timeout: 3000 });
-    await expect(page.getByText(`The correct answer was: ${correctAnswer}`).first()).toBeVisible();
+    await expect(page.getByText('The correct answer was:').first()).toBeVisible();
+    await expect(page.getByText(correctAnswer).first()).toBeVisible();
     await expect(page.getByText(/You solved.*Day.*in 2/).first()).toBeVisible();
 
     // Verify View Results button is available
@@ -117,8 +118,8 @@ test.describe('First-Time User Journey', () => {
     const playedStat = modal.locator('text=Played').locator('..');
     await expect(playedStat).toContainText('1');
 
-    // Verify streak
-    const streakStat = modal.locator('text=Current Streak').locator('..');
+    // Verify streak — use exact match to avoid also matching "Max Streak"
+    const streakStat = modal.getByText('Streak', { exact: true }).locator('..');
     await expect(streakStat).toContainText('1');
   });
 });

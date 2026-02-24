@@ -173,10 +173,10 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col items-center justify-start sm:justify-center px-4 pb-4 sm:pb-20">
+        <div className="flex-1 flex flex-col items-center justify-start sm:justify-start px-4 pb-4 sm:pb-4 sm:pt-10">
 
           {/* Medical Image Display */}
-          <div className="w-full max-w-3xl mb-3 sm:mb-8">
+          <div className="w-full max-w-3xl mb-3 sm:mb-3">
             <div className={`relative w-full aspect-[16/9] bg-black rounded-lg overflow-hidden shadow-2xl transition-all duration-300 ${imageBorderStyle}`}>
               {puzzle.image_url ? (
                 <Image
@@ -214,7 +214,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
 
           {/* Hints Display - only show revealed hints */}
           {visibleHints.length > 0 && (
-            <div className="w-full max-w-xl mx-auto space-y-3 mb-6">
+            <div className="w-full max-w-xl mx-auto space-y-3 mb-4">
               {visibleHints.map((hint, index) => {
                 // Hints are revealed after a guess. The guess that revealed this hint is at index.
                 // To color the hint based on the NEXT guess after it was revealed, we look at index + 1.
