@@ -45,7 +45,7 @@ test.describe('Network Failure Handling', () => {
 
     // Wait for game to load
     try {
-      await page.locator('img[alt*="Puzzle"]').waitFor({ state: 'visible', timeout: 15000 });
+      await page.locator('img[alt*="Puzzle"]').first().waitFor({ state: 'visible', timeout: 15000 });
     } catch {
       // If the page fails to load, skip this test
       test.skip();
@@ -95,7 +95,7 @@ test.describe('Network Failure Handling', () => {
     await acceptCookieConsent(page);
 
     try {
-      await page.locator('img[alt*="Puzzle"]').waitFor({ state: 'visible', timeout: 15000 });
+      await page.locator('img[alt*="Puzzle"]').first().waitFor({ state: 'visible', timeout: 15000 });
     } catch {
       test.skip();
       return;
@@ -113,7 +113,7 @@ test.describe('Network Failure Handling', () => {
     await page.reload();
 
     try {
-      await page.locator('img[alt*="Puzzle"]').waitFor({ state: 'visible', timeout: 15000 });
+      await page.locator('img[alt*="Puzzle"]').first().waitFor({ state: 'visible', timeout: 15000 });
       // Game loaded successfully after network restored
       await expect(page.getByText("What's the Diagnosis?").first()).toBeVisible();
     } catch {

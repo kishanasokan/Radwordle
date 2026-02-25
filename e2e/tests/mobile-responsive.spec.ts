@@ -50,7 +50,7 @@ test.describe('Mobile Responsiveness', () => {
     await waitForGameLoad(page);
 
     // Image should be visible and fit within viewport
-    const image = page.locator('img[alt*="Puzzle"]');
+    const image = page.locator('img[alt*="Puzzle"]').first();
     const box = await image.boundingBox();
     expect(box).not.toBeNull();
     if (box) {
