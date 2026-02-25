@@ -15,6 +15,14 @@ export default function StatsModal({ isOpen, onClose, stats }: StatsModalProps) 
   const [globalStats, setGlobalStats] = useState<GlobalStats | null>(null);
   const [percentileBeat, setPercentileBeat] = useState<number | null>(null);
 
+  // Lock background scroll while modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [isOpen]);
+
   // Fetch global stats when modal opens
   useEffect(() => {
     if (isOpen) {
@@ -61,11 +69,11 @@ export default function StatsModal({ isOpen, onClose, stats }: StatsModalProps) 
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[100] p-4 animate-backdrop-fade"
+      className="fixed inset-0 bg-black/50  flex items-center justify-center z-[100] p-4 animate-backdrop-fade"
       onClick={onClose}
     >
       <div
-        className="bg-gradient-to-b from-modal-bg to-page-bg-dark rounded-lg p-4 sm:p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto font-baloo-2 animate-modal-enter"
+        className="bg-gradient-to-b from-modal-bg to-page-bg-dark rounded-lg p-4 sm:p-8 max-w-md w-full shadow-2xl max-h-[90vh] sm:max-h-none overflow-y-auto font-baloo-2 animate-modal-enter"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Title */}

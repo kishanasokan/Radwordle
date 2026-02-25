@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 interface FeedbackModalProps {
@@ -24,6 +24,14 @@ export default function FeedbackModal({ isOpen, onClose, pageContext }: Feedback
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Lock background scroll while modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -91,7 +99,7 @@ export default function FeedbackModal({ isOpen, onClose, pageContext }: Feedback
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[100] p-4 animate-backdrop-fade"
+      className="fixed inset-0 bg-black/50  flex items-center justify-center z-[100] p-4 animate-backdrop-fade"
       onClick={handleClose}
     >
       <div

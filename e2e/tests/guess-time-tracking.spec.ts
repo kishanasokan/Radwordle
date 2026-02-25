@@ -78,7 +78,7 @@ test.describe('Guess Time Tracking', () => {
     await expect(page.getByText('Congratulations!').first()).toBeVisible({ timeout: 3000 });
 
     // The results modal should show average guess time
-    const modal = page.locator('.fixed.inset-0.bg-black');
+    const modal = page.locator('[data-testid="results-modal"]');
 
     // Look for the "Avg Time" label — use .first() since desktop+mobile layouts both render it
     const avgTimeLabel = modal.getByText('Avg Time').first();

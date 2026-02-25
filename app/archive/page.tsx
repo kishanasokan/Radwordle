@@ -4,7 +4,7 @@ import ArchiveBrowser from '@/components/ArchiveBrowser';
 
 export default function ArchivePage() {
   return (
-    <div className="min-h-screen relative overflow-y-auto overflow-x-hidden">
+    <div className="min-h-screen-safe relative overflow-y-auto overflow-x-hidden" style={{ minHeight: 'var(--full-vh)' }}>
       {/* Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-page-bg via-page-bg-mid to-page-bg">
         {/* Radial Vignette */}
@@ -18,7 +18,7 @@ export default function ArchivePage() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 min-h-screen flex flex-col">
+      <div className="relative z-10 min-h-screen-safe flex flex-col" style={{ minHeight: 'var(--full-vh)' }}>
         {/* Header */}
         <div className="flex justify-between items-center p-4 sm:p-6">
           {/* Back Button */}
@@ -29,8 +29,8 @@ export default function ArchivePage() {
             <span className="text-xl sm:text-2xl">←</span>
           </Link>
 
-          {/* Logo and Title - Centered */}
-          <div className="flex items-center gap-1 drop-shadow-[0_6px_20px_rgba(0,0,0,0.6)]">
+          {/* Logo and Title - Centered, clickable to return home */}
+          <Link href="/" className="flex items-center gap-1 drop-shadow-[0_6px_20px_rgba(0,0,0,0.6)] hover:opacity-90 transition-opacity">
             <div className="relative w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 flex-shrink-0">
               <Image
                 src="/radle_icon.svg"
@@ -42,7 +42,7 @@ export default function ArchivePage() {
             <h1 className="text-2xl sm:text-4xl md:text-[3.375rem] text-white font-baloo-2 font-extrabold tracking-tight">
               Radiordle
             </h1>
-          </div>
+          </Link>
 
           {/* Spacer for centering */}
           <div className="w-10 sm:w-12"></div>

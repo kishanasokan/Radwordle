@@ -110,7 +110,7 @@ test.describe('First-Time User Journey', () => {
 
     // The results modal (inline in GameClient) should show stats
     // Check for statistics section in the modal
-    const modal = page.locator('.fixed.inset-0.bg-black');
+    const modal = page.locator('[data-testid="results-modal"]');
     await expect(modal.getByText('Statistics')).toBeVisible();
 
     // Verify stats: 1 game played

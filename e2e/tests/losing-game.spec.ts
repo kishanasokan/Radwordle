@@ -108,7 +108,7 @@ test.describe('Losing Game Flow', () => {
     // Modal should be visible with stats
     await expect(page.getByText('Game Over').first()).toBeVisible({ timeout: 3000 });
 
-    const modal = page.locator('.fixed.inset-0.bg-black');
+    const modal = page.locator('[data-testid="results-modal"]');
 
     // Verify stats: 1 game played, 0% win rate
     const playedStat = modal.locator('text=Played').locator('..');
