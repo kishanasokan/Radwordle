@@ -531,7 +531,7 @@ function ResultsModal({
       onClick={onClose}
     >
       <div
-        className="bg-gradient-to-b from-modal-bg to-page-bg-dark rounded-lg p-4 sm:p-8 max-w-md sm:max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto font-baloo-2 animate-modal-enter"
+        className="bg-gradient-to-b from-modal-bg to-page-bg-dark rounded-lg p-4 sm:p-8 max-w-md sm:max-w-2xl w-full shadow-2xl max-h-[90vh] sm:max-h-none overflow-y-auto font-baloo-2 animate-modal-enter"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-2 sm:mb-4">
@@ -570,7 +570,10 @@ function ResultsModal({
 
         {/* Statistics */}
         <div className="bg-white rounded-lg p-3 sm:p-4 mb-2 sm:mb-4">
-          <h3 className="text-xl sm:text-2xl font-bold text-black text-center mb-2">Statistics</h3>
+          <h3 className="text-xl sm:text-2xl font-bold text-black text-center mb-1">Statistics</h3>
+          {isArchive && (
+            <p className="text-xs italic text-gray-500 text-center mb-2">Archive puzzles are not included in your statistics.</p>
+          )}
           <div className="grid grid-cols-4 gap-2 sm:gap-3 text-center">
             <div>
               <p className="text-xl sm:text-2xl font-bold text-success leading-tight">{stats.gamesPlayed}</p>
