@@ -11,7 +11,7 @@ vi.mock('@supabase/supabase-js', () => ({
   })),
 }))
 
-import { getHintsFromPuzzle, calculatePercentileBeat } from '@/lib/supabase'
+import { getHintsFromPuzzle, calculatePercentileBeat, calculatePuzzlePercentile } from '@/lib/supabase'
 import type { Puzzle } from '@/lib/supabase'
 
 function makePuzzle(overrides: Partial<Puzzle> = {}): Puzzle {
@@ -162,5 +162,49 @@ describe('calculatePercentileBeat', () => {
 
     // User avg = 2, players with > 2: 1 out of 3 = 33.33...
     expect(result).toBe(33)
+  })
+})
+
+describe('calculatePuzzlePercentile', () => {
+  it('includes losers when totalAttempts is provided', () => {
+    // 100 total attempts, 60 wins, 40 losses
+    const dist = { 1: 15, 2: 20, 3: 15, 4: 10 }
+    const result = calculatePuzzlePercentile(1, dist, 100)
+
+    // worseThanUser = 40 (losers) + 20+15+10 (worse winners) = 85
+    // 85/100 = 85%
+    expect(result).toBe(85)
+  })
+
+  it('falls back to winners-only when totalAttempts not provided', () => {
+    const dist = { 1: 15, 2: 20, 3: 15, 4: 10 }
+    const result = calculatePuzzlePercentile(1, dist)
+
+    // worseThanUser = 20+15+10 = 45, totalWins = 60
+    // 45/60 = 75%
+    expect(result).toBe(75)
+  })
+
+  it('returns null for empty distribution', () => {
+    expect(calculatePuzzlePercentile(1, {})).toBeNull()
+    expect(calculatePuzzlePercentile(1, {}, 0)).toBeNull()
+  })
+
+  it('returns 0 for worst guess with no losers', () => {
+    const dist = { 1: 10, 2: 20, 3: 30, 4: 25, 5: 15 }
+    const result = calculatePuzzlePercentile(5, dist, 100)
+
+    // No one took more guesses, losers = 0
+    expect(result).toBe(0)
+  })
+
+  it('counts all losers as worse even for worst guess count', () => {
+    const dist = { 1: 10, 2: 20, 3: 15, 4: 10, 5: 5 }
+    // 60 wins, 40 losses
+    const result = calculatePuzzlePercentile(5, dist, 100)
+
+    // worseThanUser = 40 (losers) + 0 (no worse winners) = 40
+    // 40/100 = 40%
+    expect(result).toBe(40)
   })
 })

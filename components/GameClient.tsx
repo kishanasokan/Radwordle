@@ -453,9 +453,9 @@ function ResultsModal({
 
     // Percentile: compare user's guess count on THIS puzzle vs this puzzle's distribution
     if (isWon) {
-      getPuzzleGuessDistribution(puzzleNumber).then((dist) => {
-        if (dist) {
-          const percentile = calculatePuzzlePercentile(guessCount, dist);
+      getPuzzleGuessDistribution(puzzleNumber).then((result) => {
+        if (result) {
+          const percentile = calculatePuzzlePercentile(guessCount, result.distribution, result.totalAttempts);
           setPercentileBeat(percentile);
         }
       });
