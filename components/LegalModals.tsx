@@ -1,10 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function LegalModals() {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [showTermsOfService, setShowTermsOfService] = useState(false);
+
+  // Lock background scroll while any legal modal is open
+  useEffect(() => {
+    if (showPrivacyPolicy || showTermsOfService) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [showPrivacyPolicy, showTermsOfService]);
 
   return (
     <>
@@ -28,8 +36,8 @@ export default function LegalModals() {
 
       {/* Privacy Policy Modal */}
       {showPrivacyPolicy && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-          <div className="bg-page-bg rounded-xl w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl border border-white/10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowPrivacyPolicy(false)}>
+          <div className="bg-page-bg rounded-xl w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl border border-white/10" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center p-4 sm:p-6 border-b border-white/10">
               <h2 className="text-xl sm:text-2xl text-white font-baloo-2 font-bold">Privacy Policy</h2>
               <button
@@ -110,8 +118,8 @@ export default function LegalModals() {
 
       {/* Terms of Service Modal */}
       {showTermsOfService && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-          <div className="bg-page-bg rounded-xl w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl border border-white/10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowTermsOfService(false)}>
+          <div className="bg-page-bg rounded-xl w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl border border-white/10" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center p-4 sm:p-6 border-b border-white/10">
               <h2 className="text-xl sm:text-2xl text-white font-baloo-2 font-bold">Terms of Service</h2>
               <button

@@ -434,6 +434,12 @@ function ResultsModal({
   onClose,
   onCopied,
 }: ResultsModalProps) {
+  // Lock background scroll while modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
   const stats = getStatistics();
   const [globalStats, setGlobalStats] = useState<GlobalStats | null>(null);
   const [percentileBeat, setPercentileBeat] = useState<number | null>(null);
@@ -527,7 +533,7 @@ function ResultsModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4 animate-backdrop-fade"
+      className="fixed inset-0 bg-black/50  flex items-center justify-center z-50 p-4 animate-backdrop-fade"
       onClick={onClose}
     >
       <div
