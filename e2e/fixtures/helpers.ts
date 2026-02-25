@@ -236,8 +236,8 @@ export const SEARCH_TERMS = [
  * Waits for the game to fully load (image and input visible).
  */
 export async function waitForGameLoad(page: Page): Promise<void> {
-  // Wait for the game image
-  await page.locator('img[alt*="Puzzle"]').waitFor({ state: 'visible', timeout: 15000 });
+  // Wait for the game image (use .first() since annotated image overlay may also match)
+  await page.locator('img[alt*="Puzzle"]').first().waitFor({ state: 'visible', timeout: 15000 });
   // Wait for a visible input field (uses :visible to handle dual layout on any viewport)
   await page.locator('input[placeholder="Diagnosis..."]:visible').first().waitFor({ state: 'visible', timeout: 5000 });
 }
