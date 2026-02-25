@@ -128,7 +128,7 @@ export default function AboutPage() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 mt-6">
                   <a
-                    href="https://github.com/kganiga/radiordle"
+                    href="https://github.com/kishanasokan/Radwordle"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 px-6 py-3 bg-[#24292e] hover:bg-[#3a3f44] text-white rounded-lg transition-colors font-bold"
