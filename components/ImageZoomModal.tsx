@@ -5,18 +5,19 @@ import Image from 'next/image';
 import { X } from 'lucide-react';
 
 interface ImageZoomModalProps {
-  isOpen: boolean;
   onClose: () => void;
   imageUrl: string;
   altText: string;
 }
 
-export default function ImageZoomModal({ isOpen, onClose, imageUrl, altText }: ImageZoomModalProps) {
+export default function ImageZoomModal({ onClose, imageUrl, altText }: ImageZoomModalProps) {
+  // Parent conditionally renders this component and uses key={} to force remount
+  // on each open, so all state starts fresh — no reset logic needed.
   const [scale, setScale] = useState(1);
   const [translate, setTranslate] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [hasTransition, setHasTransition] = useState(true);
-  const [showHint, setShowHint] = useState(false);
+  const [showHint, setShowHint] = useState(true);
 
   const dragStart = useRef({ x: 0, y: 0 });
   const translateStart = useRef({ x: 0, y: 0 });
@@ -29,9 +30,9 @@ export default function ImageZoomModal({ isOpen, onClose, imageUrl, altText }: I
   // Interaction tracking — prevents close after zoom/pan/pinch gestures
   const pointerDownPos = useRef({ x: 0, y: 0 });
   const interactionCooldown = useRef(false);
-  const cooldownTimer = useRef<ReturnType<typeof setTimeout>>();
+  const cooldownTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Drag-ready flags — set on pointer down, cleared on up, reset on modal open
+  // Drag-ready flags — set on pointer down, cleared on up
   const mouseDownReady = useRef(false);
   const touchDownReady = useRef(false);
 
@@ -52,52 +53,35 @@ export default function ImageZoomModal({ isOpen, onClose, imageUrl, altText }: I
   useEffect(() => { isDraggingRef.current = isDragging; }, [isDragging]);
   useEffect(() => { scaleRef.current = scale; }, [scale]);
 
-  // Reset state when modal opens + show hint
+  // Auto-hide hint after 5 seconds
   useEffect(() => {
-    if (isOpen) {
-      setScale(1);
-      setTranslate({ x: 0, y: 0 });
-      setIsDragging(false);
-      setHasTransition(true);
-      interactionCooldown.current = false;
-      mouseDownReady.current = false;
-      touchDownReady.current = false;
-      clearTimeout(cooldownTimer.current);
-
-      setShowHint(true);
-      const hideTimer = setTimeout(() => setShowHint(false), 5000);
-      return () => clearTimeout(hideTimer);
-    } else {
-      setShowHint(false);
-    }
-  }, [isOpen]);
+    if (!showHint) return;
+    const hideTimer = setTimeout(() => setShowHint(false), 5000);
+    return () => clearTimeout(hideTimer);
+  }, [showHint]);
 
   // Cleanup timer on unmount
   useEffect(() => {
     return () => clearTimeout(cooldownTimer.current);
   }, []);
 
-  // Lock body scroll
+  // Lock body scroll (component only mounts when open)
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      return () => { document.body.style.overflow = ''; };
-    }
-  }, [isOpen]);
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
 
   // ESC to close
   useEffect(() => {
-    if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [onClose]);
 
   // Desktop: wheel zoom — native listener for passive:false
   useEffect(() => {
-    if (!isOpen) return;
     const container = containerRef.current;
     if (!container) return;
 
@@ -117,11 +101,10 @@ export default function ImageZoomModal({ isOpen, onClose, imageUrl, altText }: I
 
     container.addEventListener('wheel', handleWheel, { passive: false });
     return () => container.removeEventListener('wheel', handleWheel);
-  }, [isOpen, startCooldown]);
+  }, [startCooldown]);
 
   // Mobile: touchmove — native listener for passive:false (preventDefault required)
   useEffect(() => {
-    if (!isOpen) return;
     const container = containerRef.current;
     if (!container) return;
 
@@ -164,7 +147,7 @@ export default function ImageZoomModal({ isOpen, onClose, imageUrl, altText }: I
 
     container.addEventListener('touchmove', handleNativeTouchMove, { passive: false });
     return () => container.removeEventListener('touchmove', handleNativeTouchMove);
-  }, [isOpen, startCooldown]);
+  }, [startCooldown]);
 
   // --- Pointer down: record position for all interactions ---
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
@@ -253,8 +236,6 @@ export default function ImageZoomModal({ isOpen, onClose, imageUrl, altText }: I
     }
     initialPinchDistance.current = 0;
   }, [isDragging, startCooldown]);
-
-  if (!isOpen) return null;
 
   return (
     <div

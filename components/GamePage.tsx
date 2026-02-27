@@ -24,6 +24,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
   const [showStats, setShowStats] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [showZoom, setShowZoom] = useState(false);
+  const [zoomKey, setZoomKey] = useState(0);
   const zoomClosedAt = useRef(0);
   const handleZoomClose = useCallback(() => {
     zoomClosedAt.current = Date.now();
@@ -222,7 +223,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
           <div className="w-full max-w-3xl lg:max-w-4xl mb-3 sm:mb-6 sticky top-0 sm:static z-20 pb-2">
             <div
               className={`relative w-full aspect-[16/9] bg-black rounded-lg overflow-hidden shadow-2xl transition-all duration-300 cursor-pointer ${imageBorderStyle}${showImagePulse ? ' animate-image-pulse' : ''}`}
-              onClick={() => puzzle.image_url && Date.now() - zoomClosedAt.current > 300 && setShowZoom(true)}
+              onClick={() => { if (puzzle.image_url && Date.now() - zoomClosedAt.current > 300) { setZoomKey(k => k + 1); setShowZoom(true); } }}
               role="button"
               tabIndex={0}
               onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && puzzle.image_url) { e.preventDefault(); setShowZoom(true); } }}
@@ -350,10 +351,10 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
         pageContext={isArchive ? `archive/day-${dayNumber}` : `day-${dayNumber}`}
       />
 
-      {/* Image Zoom Modal */}
-      {activeImageUrl && (
+      {/* Image Zoom Modal — key forces fresh remount on each open */}
+      {showZoom && activeImageUrl && (
         <ImageZoomModal
-          isOpen={showZoom}
+          key={zoomKey}
           onClose={handleZoomClose}
           imageUrl={activeImageUrl}
           altText={`Puzzle ${puzzle.puzzle_number}${showAnnotated ? ' annotated' : ''}`}
