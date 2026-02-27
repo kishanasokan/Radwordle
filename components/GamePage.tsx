@@ -226,7 +226,7 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
               onClick={() => { if (puzzle.image_url && Date.now() - zoomClosedAt.current > 300) { setZoomKey(k => k + 1); setShowZoom(true); } }}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && puzzle.image_url) { e.preventDefault(); setShowZoom(true); } }}
+              onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && puzzle.image_url) { e.preventDefault(); setZoomKey(k => k + 1); setShowZoom(true); } }}
               aria-label="Click to zoom image"
             >
               {puzzle.image_url ? (
