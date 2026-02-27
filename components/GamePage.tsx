@@ -3,10 +3,12 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { ZoomIn } from 'lucide-react';
 import { Puzzle, Hint, Condition } from '@/lib/supabase';
 import GameClient from './GameClient';
 import StatsModal from './StatsModal';
 import FeedbackModal from './FeedbackModal';
+import ImageZoomModal from './ImageZoomModal';
 import { GameState, getStatistics, Statistics } from '@/lib/localStorage';
 
 interface GamePageProps {
@@ -21,6 +23,13 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [showStats, setShowStats] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showZoom, setShowZoom] = useState(false);
+  const [zoomKey, setZoomKey] = useState(0);
+  const zoomClosedAt = useRef(0);
+  const handleZoomClose = useCallback(() => {
+    zoomClosedAt.current = Date.now();
+    setShowZoom(false);
+  }, []);
   const [stats, setStats] = useState<Statistics>({
     gamesPlayed: 0,
     gamesWon: 0,
@@ -85,6 +94,11 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
     ? puzzle.annotated_image_url
     : null;
   const showAnnotated = !!annotatedImageUrl && (gameState?.guesses.length ?? 0) >= 1;
+
+  // Active image URL for zoom modal — show whichever version is currently displayed
+  const activeImageUrl = showAnnotated && annotatedImageUrl
+    ? annotatedImageUrl
+    : puzzle.image_url;
 
   return (
     <div className="min-h-screen-safe relative overflow-y-auto overflow-x-hidden" style={{ minHeight: 'var(--full-vh)' }}>
@@ -207,7 +221,14 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
 
           {/* Medical Image Display - sticky on mobile so it stays visible when keyboard opens */}
           <div className="w-full max-w-3xl lg:max-w-4xl mb-3 sm:mb-6 sticky top-0 sm:static z-20 pb-2">
-            <div className={`relative w-full aspect-[16/9] bg-black rounded-lg overflow-hidden shadow-2xl transition-all duration-300 ${imageBorderStyle}${showImagePulse ? ' animate-image-pulse' : ''}`}>
+            <div
+              className={`relative w-full aspect-[16/9] bg-black rounded-lg overflow-hidden shadow-2xl transition-all duration-300 cursor-pointer ${imageBorderStyle}${showImagePulse ? ' animate-image-pulse' : ''}`}
+              onClick={() => { if (puzzle.image_url && Date.now() - zoomClosedAt.current > 300) { setZoomKey(k => k + 1); setShowZoom(true); } }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && puzzle.image_url) { e.preventDefault(); setZoomKey(k => k + 1); setShowZoom(true); } }}
+              aria-label="Click to zoom image"
+            >
               {puzzle.image_url ? (
                 <Image
                   src={puzzle.image_url}
@@ -232,6 +253,12 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
                     className="object-contain"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 896px"
                   />
+                </div>
+              )}
+              {/* Zoom indicator icon */}
+              {puzzle.image_url && (
+                <div className="absolute bottom-3 right-3 bg-black/50 backdrop-blur-sm rounded-full p-1.5 text-white/80 pointer-events-none">
+                  <ZoomIn size={20} />
                 </div>
               )}
             </div>
@@ -323,6 +350,16 @@ export default function GamePage({ puzzle, hints, conditions, dayNumber, isArchi
         onClose={() => setShowFeedback(false)}
         pageContext={isArchive ? `archive/day-${dayNumber}` : `day-${dayNumber}`}
       />
+
+      {/* Image Zoom Modal — key forces fresh remount on each open */}
+      {showZoom && activeImageUrl && (
+        <ImageZoomModal
+          key={zoomKey}
+          onClose={handleZoomClose}
+          imageUrl={activeImageUrl}
+          altText={`Puzzle ${puzzle.puzzle_number}${showAnnotated ? ' annotated' : ''}`}
+        />
+      )}
     </div>
   );
 }
